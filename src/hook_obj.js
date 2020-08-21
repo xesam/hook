@@ -7,7 +7,8 @@ function hook(target, hooks, thisArg) {
     }
     Object.entries(hooks).forEach(([key, fn]) => {
         if (typeof fn === 'function') {
-            target[key] = hook_function(target[key], fn(), thisArg || hooks);
+            const _hook = fn();
+            target[key] = hook_function(target[key], _hook, thisArg || _hook);
         }
     });
     return target;

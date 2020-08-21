@@ -1,15 +1,41 @@
 const HookPage = require('./HookPage');
 
-describe('simple hook function', () => {
+describe('HookPage', () => {
     it('simple', () => {
         const onLoadCallback = jest.fn();
         const onShowCallback = jest.fn();
         const onUnloadCallback = jest.fn();
-        HookPage({
+
+        const _HookPage = new HookPage();
+        _HookPage.add({
+            onLoad() {
+                return {
+                    id: 1,
+                    before(page, query) {
+                        onLoadCallback('before', query.name, this.id);
+                    },
+                    after(page, query) {
+                        onLoadCallback('after', query.name, this.id);
+                    }
+                }
+            }
+        }).add({
+            onLoad() {
+                return {
+                    id: 2,
+                    before(page, query) {
+                        onLoadCallback('before', query.name, this.id);
+                    },
+                    after(page, query) {
+                        onLoadCallback('after', query.name, this.id);
+                    }
+                }
+            }
+        });
+
+        _HookPage.Page({
             onLoad(query) {
-                onLoadCallback(query);
-                const a = null.length;
-                onLoadCallback(query);
+                onLoadCallback(query.name);
             },
 
             onShow() {
@@ -22,11 +48,13 @@ describe('simple hook function', () => {
         });
 
         expect(onLoadCallback).toBeCalled();
-        expect(onLoadCallback.mock.calls[0][0]).toEqual({
-            id: '123456'
-        });
-
         expect(onShowCallback).toBeCalled();
         expect(onUnloadCallback).toBeCalled();
+
+        expect(onLoadCallback.mock.calls[0]).toEqual(['before', '_page', 2]);
+        expect(onLoadCallback.mock.calls[1]).toEqual(['before', '_page', 1]);
+        expect(onLoadCallback.mock.calls[2]).toEqual(['_page']);
+        expect(onLoadCallback.mock.calls[3]).toEqual(['after', '_page', 1]);
+        expect(onLoadCallback.mock.calls[4]).toEqual(['after', '_page', 2]);
     })
 });

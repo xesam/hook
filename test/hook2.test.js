@@ -51,9 +51,9 @@ describe('hook object', () => {
         const onLoadCallback = jest.fn();
         const onShowCallback = jest.fn();
         const hooked2 = hook(obj, {
-            id: 100,
             onLoad() {
                 return {
+                    id: 100,
                     before() {
                         onLoadCallback('before', this.id);
                     },
@@ -65,6 +65,7 @@ describe('hook object', () => {
 
             onShow() {
                 return {
+                    id: 100,
                     before() {
                         onShowCallback('before', this.id);
                     },
@@ -76,9 +77,9 @@ describe('hook object', () => {
         });
 
         const hooked3 = hook(hooked2, {
-            id: 200,
             onLoad() {
                 return {
+                    id: 200,
                     before() {
                         onLoadCallback('before', this.id);
                     },
@@ -90,6 +91,7 @@ describe('hook object', () => {
 
             onShow() {
                 return {
+                    id: 200,
                     before() {
                         onShowCallback('before', this.id);
                     },
