@@ -1,4 +1,9 @@
+const {is_hook} = require('./_h');
+
 function hook(fn, hooks, thisArg) {
+    if (!is_hook(hooks)) {
+        return fn;
+    }
     return function _hook() {
         if (hooks.before) {
             hooks.before.call(thisArg || this, this, ...arguments);

@@ -1,17 +1,32 @@
 const HookPage = require('./HookPage');
 
-HookPage({
-    onLoad(query) {
-        console.log('onLoad', query);
-        const a = null.length;
-        console.log(a);
-    },
+describe('simple hook function', () => {
+    it('simple', () => {
+        const onLoadCallback = jest.fn();
+        const onShowCallback = jest.fn();
+        const onUnloadCallback = jest.fn();
+        HookPage({
+            onLoad(query) {
+                onLoadCallback(query);
+                const a = null.length;
+                onLoadCallback(query);
+            },
 
-    onShow() {
-        console.log('onShow');
-    },
+            onShow() {
+                onShowCallback();
+            },
 
-    onUnload() {
-        console.log('onUnload');
-    }
+            onUnload() {
+                onUnloadCallback();
+            }
+        });
+
+        expect(onLoadCallback).toBeCalled();
+        expect(onLoadCallback.mock.calls[0][0]).toEqual({
+            id: '123456'
+        });
+
+        expect(onShowCallback).toBeCalled();
+        expect(onUnloadCallback).toBeCalled();
+    })
 });

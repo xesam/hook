@@ -1,6 +1,6 @@
 function Page(option) {
     const query = {
-        id: '123456'
+        name: 'page query'
     };
     option.onLoad(query);
     option.onShow();
