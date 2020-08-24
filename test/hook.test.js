@@ -2,23 +2,23 @@ const hook = require('../src/index').hook_function;
 
 describe('hook function', () => {
     it('simple hook nothing', () => {
-        const targetCallback = jest.fn();
+        const targetFn = jest.fn();
         const beforeCallback = jest.fn();
         const afterCallback = jest.fn();
 
-        const hooked = hook(targetCallback);
+        const hooked = hook(targetFn);
         hooked();
         expect(beforeCallback).not.toBeCalled();
-        expect(targetCallback).toBeCalled();
+        expect(targetFn).toBeCalled();
         expect(afterCallback).not.toBeCalled();
     });
 
     it('simple hook function', () => {
-        const targetCallback = jest.fn();
+        const targetFn = jest.fn();
         const beforeCallback = jest.fn();
         const afterCallback = jest.fn();
 
-        let hooked = hook(targetCallback, {
+        let hooked = hook(targetFn, {
             before() {
                 beforeCallback(1);
             },
@@ -39,19 +39,19 @@ describe('hook function', () => {
         expect(beforeCallback.mock.calls[0]).toEqual([2]);
         expect(beforeCallback.mock.calls[1]).toEqual([1]);
 
-        expect(targetCallback.mock.calls[0]).toEqual([100, 200]);
+        expect(targetFn.mock.calls[0]).toEqual([100, 200]);
 
         expect(afterCallback.mock.calls[0]).toEqual([1]);
         expect(afterCallback.mock.calls[1]).toEqual([2]);
     });
 
     it('simple hook this', () => {
-        const targetCallback = jest.fn();
+        const targetFn = jest.fn();
         const beforeCallback = jest.fn();
         const afterCallback = jest.fn();
 
         function fn(a, b) {
-            targetCallback(this.name, a, b);
+            targetFn(this.name, a, b);
         }
 
         const obj = {
@@ -67,9 +67,9 @@ describe('hook function', () => {
             }
         });
         obj.fn(100, 200);
-        expect(targetCallback.mock.calls[0][0]).toBe('hook');
-        expect(targetCallback.mock.calls[0][1]).toBe(100);
-        expect(targetCallback.mock.calls[0][2]).toBe(200);
+        expect(targetFn.mock.calls[0][0]).toBe('hook');
+        expect(targetFn.mock.calls[0][1]).toBe(100);
+        expect(targetFn.mock.calls[0][2]).toBe(200);
     });
 
     it('simple hook throw', () => {

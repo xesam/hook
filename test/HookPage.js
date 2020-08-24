@@ -11,22 +11,11 @@ class HookPage {
         return this;
     }
 
-    Page(option){
+    Page(option) {
         Page(this.hooks.reduce((total, ele) => {
             return hook(total, ele);
         }, option));
     }
 }
-
-// function HookPage(option) {
-//     this.hooks = [];
-//     return Page(this.hooks.reduce((total, ele) => {
-//         return hook(total, ele);
-//     }, option));
-// }
-//
-// HookPage.add = function (_hook) {
-//     this.hooks.push(_hook);
-// }
 
 module.exports = HookPage;
