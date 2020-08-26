@@ -36,13 +36,13 @@ output:
 
     const hooked = hook(target, {
         onLoad() {
+            const id = 100;
             return {
-                id: 100,
                 before() {
-                    console.log('before', this.id);
+                    console.log('before', id);
                 },
                 after() {
-                    console.log('after', this.id);
+                    console.log('after', id);
                 }
             };
         }
