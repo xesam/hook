@@ -1,6 +1,6 @@
 const HookPage = require('./HookPage');
 
-describe('HookPage', () => {
+describe('test HookPage', () => {
     it('simple', () => {
         const onLoadCallback = jest.fn();
         const onShowCallback = jest.fn();

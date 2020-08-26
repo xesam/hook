@@ -1,7 +1,7 @@
-const hook = require('../src/index').hook_function;
+const hook = require('../index');
 
 describe('hook function', () => {
-    it('simple hook nothing', () => {
+    it('hook nothing', () => {
         const targetFn = jest.fn();
         const beforeCallback = jest.fn();
         const afterCallback = jest.fn();
@@ -13,7 +13,7 @@ describe('hook function', () => {
         expect(afterCallback).not.toBeCalled();
     });
 
-    it('simple hook function', () => {
+    it('hook function', () => {
         const targetFn = jest.fn();
         const beforeCallback = jest.fn();
         const afterCallback = jest.fn();
@@ -36,6 +36,7 @@ describe('hook function', () => {
             }
         });
         hooked(100, 200);
+
         expect(beforeCallback.mock.calls[0]).toEqual([2]);
         expect(beforeCallback.mock.calls[1]).toEqual([1]);
 
@@ -45,7 +46,7 @@ describe('hook function', () => {
         expect(afterCallback.mock.calls[1]).toEqual([2]);
     });
 
-    it('simple hook this', () => {
+    it('hook function this', () => {
         const targetFn = jest.fn();
         const beforeCallback = jest.fn();
         const afterCallback = jest.fn();
@@ -55,10 +56,11 @@ describe('hook function', () => {
         }
 
         const obj = {
-            name: 'hook'
+            name: 'target'
         };
 
         obj.fn = hook(fn, {
+            name: 'hook',
             before() {
                 beforeCallback();
             },
@@ -67,12 +69,12 @@ describe('hook function', () => {
             }
         });
         obj.fn(100, 200);
-        expect(targetFn.mock.calls[0][0]).toBe('hook');
+        expect(targetFn.mock.calls[0][0]).toBe('target');
         expect(targetFn.mock.calls[0][1]).toBe(100);
         expect(targetFn.mock.calls[0][2]).toBe(200);
     });
 
-    it('simple hook throw', () => {
+    it('hook throw', () => {
         const beforeCallback = jest.fn();
         const afterCallback = jest.fn();
         const throwCallback = jest.fn();
@@ -97,4 +99,62 @@ describe('hook function', () => {
         expect(afterCallback).toBeCalled();
         expect(throwCallback).toBeCalled();
     });
+});
+
+describe('hook simple', () => {
+    it('simple', () => {
+        const targetOnLoad = jest.fn();
+        const targetOnShow = jest.fn();
+        const beforeCallback = jest.fn();
+        const afterCallback = jest.fn();
+
+        const obj = {
+            id: 1,
+            onLoad(query) {
+                targetOnLoad(query, this.id);
+            },
+            onShow() {
+                targetOnShow(this.id);
+            }
+        };
+
+        const obj2 = hook.simple(obj, ['onLoad', 'onShow'], {
+            id: 2,
+            before() {
+                beforeCallback(this.id);
+            },
+            after() {
+                afterCallback(this.id);
+            }
+        });
+
+        const obj3 = hook.simple(obj2, ['onLoad'], {
+            id: 3,
+            before() {
+                beforeCallback(this.id);
+            },
+            after() {
+                afterCallback(this.id);
+            }
+        });
+        obj3.onLoad(100);
+        expect(targetOnLoad).toBeCalledTimes(1);
+        expect(targetOnLoad.mock.calls[0]).toEqual([100, 1]);
+
+        expect(beforeCallback).toBeCalledTimes(2);
+        expect(beforeCallback.mock.calls[0]).toEqual([1]);
+
+        expect(afterCallback).toBeCalledTimes(2);
+        expect(afterCallback.mock.calls[0]).toEqual([1]);
+
+        obj3.onShow();
+        expect(targetOnShow).toBeCalledTimes(1);
+        expect(targetOnShow.mock.calls[0]).toEqual([1]);
+
+        expect(beforeCallback).toBeCalledTimes(3);
+        expect(beforeCallback.mock.calls[2]).toEqual([1]);
+
+        expect(afterCallback).toBeCalledTimes(3);
+        expect(afterCallback.mock.calls[2]).toEqual([1]);
+    })
 });

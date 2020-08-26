@@ -1,4 +1,4 @@
-const hook = require('../src/index').hook_obj;
+const hook = require('../index');
 const Page = require('./Page');
 
 class HookPage {

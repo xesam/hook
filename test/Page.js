@@ -7,4 +7,6 @@ function Page(option) {
     option.onUnload();
 }
 
+Page.__name = 'page';
+
 module.exports = Page;
