@@ -1,18 +1,28 @@
 {
   "name": "tiny-hook",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "jest": "26.4.1"
+  },
   "scripts": {
     "test": "jest"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xesam/tiny-hook.git"
+  },
   "keywords": [],
-  "author": "",
+  "author": "xesam",
   "license": "ISC",
-  "devDependencies": {
-    "jest": "26.4.1"
-  }
+  "bugs": {
+    "url": "https://github.com/xesam/tiny-hook/issues"
+  },
+  "homepage": "https://github.com/xesam/tiny-hook#readme"
 }
