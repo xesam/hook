@@ -2,59 +2,60 @@ const HookPage = require('./HookPage');
 
 describe('test HookPage', () => {
     it('simple', () => {
+        const onLoad = jest.fn();
+        const onShow = jest.fn();
+        const onUnload = jest.fn();
         const onLoadCallback = jest.fn();
-        const onShowCallback = jest.fn();
-        const onUnloadCallback = jest.fn();
 
         const _HookPage = new HookPage();
         _HookPage.add({
             onLoad() {
+                const id = 1;
                 return {
-                    id: 1,
-                    before(page, query) {
-                        onLoadCallback('before', query.name, this.id);
+                    before(query) {
+                        onLoadCallback('before1', this.name, query.name, id);
                     },
-                    after(page, query) {
-                        onLoadCallback('after', query.name, this.id);
+                    after(query) {
+                        onLoadCallback('after1', this.name, query.name, id);
                     }
                 }
             }
         }).add({
             onLoad() {
+                const id = 2;
                 return {
-                    id: 2,
-                    before(page, query) {
-                        onLoadCallback('before', query.name, this.id);
+                    before(query) {
+                        onLoadCallback('before2', this.name, query.name, id);
                     },
-                    after(page, query) {
-                        onLoadCallback('after', query.name, this.id);
+                    after(query) {
+                        onLoadCallback('after2', this.name, query.name, id);
                     }
                 }
             }
         });
 
         _HookPage.Page({
+            name: 'page',
             onLoad(query) {
-                onLoadCallback(query.name);
+                onLoad(this.name, query.name);
             },
 
             onShow() {
-                onShowCallback();
+                onShow();
             },
 
             onUnload() {
-                onUnloadCallback();
+                onUnload();
             }
         });
 
-        expect(onLoadCallback).toBeCalled();
-        expect(onShowCallback).toBeCalled();
-        expect(onUnloadCallback).toBeCalled();
+        expect(onLoad).toBeCalled();
+        expect(onShow).toBeCalled();
+        expect(onUnload).toBeCalled();
 
-        expect(onLoadCallback.mock.calls[0]).toEqual(['before', '_page', 2]);
-        expect(onLoadCallback.mock.calls[1]).toEqual(['before', '_page', 1]);
-        expect(onLoadCallback.mock.calls[2]).toEqual(['_page']);
-        expect(onLoadCallback.mock.calls[3]).toEqual(['after', '_page', 1]);
-        expect(onLoadCallback.mock.calls[4]).toEqual(['after', '_page', 2]);
+        expect(onLoadCallback.mock.calls[0]).toEqual(['before2', 'page', '_page', 2]);
+        expect(onLoadCallback.mock.calls[1]).toEqual(['before1', 'page', '_page', 1]);
+        expect(onLoadCallback.mock.calls[2]).toEqual(['after1', 'page', '_page', 1]);
+        expect(onLoadCallback.mock.calls[3]).toEqual(['after2', 'page', '_page', 2]);
     })
 });
