@@ -16,7 +16,9 @@ function _function(target, hooks, thisArg) {
             hooks.before.call(thisArg, ...arguments);
         }
         try {
-            target.apply(this, arguments);
+            if (target) {
+                target.apply(this, arguments);
+            }
         } catch (e) {
             if (hooks.afterThrow) {
                 hooks.afterThrow.call(thisArg, e);
@@ -61,6 +63,22 @@ function simple(target, names = [], hooks, thisArg) {
     return target;
 }
 
+function hookable(origin) {
+    let wrapper = function () {
+        origin(wrapper.hooks.reduce((total, ele) => {
+            return hook(total, ele);
+        }, ...arguments));
+    };
+    wrapper.hooks = [];
+    wrapper.add = function () {
+        this.hooks.push(...arguments);
+        return this;
+    };
+    return wrapper;
+}
+
+
 hook.simple = simple;
+hook.hookable = hookable;
 
 module.exports = hook;

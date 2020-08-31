@@ -1,5 +1,5 @@
-const HookPage = require('./HookPage');
-
+const hook = require('../index');
+const Page = require('./Page');
 describe('test HookPage', () => {
     it('simple', () => {
         const onLoad = jest.fn();
@@ -7,7 +7,7 @@ describe('test HookPage', () => {
         const onUnload = jest.fn();
         const onLoadCallback = jest.fn();
 
-        const _HookPage = new HookPage();
+        const _HookPage = hook.hookable(Page);
         _HookPage.add({
             onLoad() {
                 const id = 1;
@@ -34,7 +34,7 @@ describe('test HookPage', () => {
             }
         });
 
-        _HookPage.Page({
+        _HookPage({
             name: 'page',
             onLoad(query) {
                 onLoad(this.name, query.name);
