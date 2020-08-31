@@ -3,7 +3,7 @@
 ## usage
 
 ```shell script
-    npm install xesam@hook
+    npm install @xesam/hook
 ```
 
 ```javascript
