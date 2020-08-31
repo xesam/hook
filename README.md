@@ -1,5 +1,11 @@
 # js tiny hook
 
+## usage
+
+```shell script
+    npm install xesam@hook
+```
+
 ```javascript
     function fn() {
       console.log('fn');
