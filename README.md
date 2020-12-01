@@ -1,4 +1,4 @@
-# js tiny hook
+# js hook
 
 ## usage
 ### install

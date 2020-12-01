@@ -1,7 +1,7 @@
 {
   "name": "@xesam/hook",
-  "version": "0.0.1",
-  "description": "",
+  "version": "0.0.2",
+  "description": "a tiny js hook lib",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -16,13 +16,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xesam/tiny-hook.git"
+    "url": "git+https://github.com/xesam/hook.git"
   },
   "keywords": [],
   "author": "xesam",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/xesam/tiny-hook/issues"
+    "url": "https://github.com/xesam/hook/issues"
   },
-  "homepage": "https://github.com/xesam/tiny-hook#readme"
+  "homepage": "https://github.com/xesam/hook#readme"
 }
