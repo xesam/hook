@@ -1,4 +1,4 @@
-function _h(hooks) {
+function _check(hooks) {
     return hooks;
 }
 
@@ -6,18 +6,18 @@ function isFunction(f) {
     return typeof f === 'function';
 }
 
-function _function(target, hooks, thisArg) {
-    if (!_h(hooks)) {
-        return target;
+function _function(targetFn, hooks, thisArg) {
+    if (!_check(hooks)) {
+        return targetFn;
     }
-    return function _function0() {
+    return function _function$() {
         thisArg = thisArg || this;
         if (hooks.before) {
             hooks.before.call(thisArg, ...arguments);
         }
         try {
-            if (target) {
-                target.apply(this, arguments);
+            if (targetFn) {
+                targetFn.apply(thisArg, arguments);
             }
         } catch (e) {
             if (hooks.afterThrow) {
@@ -34,7 +34,7 @@ function _function(target, hooks, thisArg) {
 }
 
 function _object(target, hooks, thisArg) {
-    if (!_h(hooks)) {
+    if (!_check(hooks)) {
         return target;
     }
     Object.entries(hooks).forEach(([key, fn]) => {
@@ -54,7 +54,7 @@ function hook(target, hooks, thisArg) {
 }
 
 function simple(target, names = [], hooks, thisArg) {
-    if (!_h(hooks)) {
+    if (!_check(hooks)) {
         return target;
     }
     names.forEach(ele => {
@@ -63,20 +63,22 @@ function simple(target, names = [], hooks, thisArg) {
     return target;
 }
 
+/**
+ *
+ * */
 function hookable(origin) {
-    let wrapper = function () {
-        origin(wrapper.hooks.reduce((total, ele) => {
-            return hook(total, ele);
-        }, ...arguments));
+    let wrapper = function (initOpts) {
+        return origin(wrapper._hooks.reduce((opts, hooks) => {
+            return hook(opts, hooks);
+        }, initOpts));
     };
-    wrapper.hooks = [];
+    wrapper._hooks = [];
     wrapper.add = function () {
-        this.hooks.push(...arguments);
+        this._hooks.push(...arguments);
         return this;
     };
     return wrapper;
 }
-
 
 hook.simple = simple;
 hook.hookable = hookable;

@@ -1,10 +1,13 @@
 # js tiny hook
 
 ## usage
+### install
 
 ```shell script
     npm install @xesam/hook
 ```
+
+### hook a simple function
 
 ```javascript
     function fn() {
@@ -27,6 +30,8 @@ output:
     fn
     after
 ```
+
+### hook object method
 
 ```javascript
     const target = {
@@ -64,15 +69,26 @@ onLoad hook
 after 100
 ```
 
+### make a function hookable
+
+    hookable = hook.hookable(fn)
+    hookable.add(hook1);
+    hookable.add(hook2);
+    hookable(opts);
+    
+equals:
+    
+    fn(hook(hook(opts, hook1), hook2))    
+
+
+
 ```javascript
     const target = {
         data: {
-            name: 'hook'
+            name: 'target_name'
         },
         onLoad(query) {
             console.log('onLoad', this.data.name);
-        },
-        onShow() {
         }
     };
 
@@ -84,13 +100,19 @@ after 100
              return {
                  before() {
                      console.log('before', id);
-                 },
-                 after() {
-                     console.log('after', id);
                  }
              };
          }
-     });
+     }).add({
+        onLoad() {
+            const id = 200;
+            return {
+                before() {
+                    console.log('before', id);
+                }
+            };
+        }
+    });
 
     hookable.onLoad();
 ```
@@ -98,8 +120,8 @@ after 100
 output:
 
 ```text
+before 200
 before 100
-onLoad hook
-after 100
+onLoad target_name
 ```
 
