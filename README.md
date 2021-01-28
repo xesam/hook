@@ -8,7 +8,7 @@ a simple javascript hook/decorate library.
 
 ```json
     {
-        "hook": "git+ssh://git@github.com:xesam/miniapp-router.git"
+        "hook": "git+ssh://git@github.com:xesam/hook.git"
     }
 ```
 
