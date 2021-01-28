@@ -2,19 +2,28 @@
 
 a simple javascript hook/decorate library.
 
+## methods 
+
+```javascript
+    const {decorate, hook} = require('@xesam/hook');
+    decorate; //decorate a function,and get a new function
+    hook; //hook a object's functional attribute
+```
+
 ## usage
 
 ### add dependency
 
 ```json
     {
-        "hook": "git+ssh://git@github.com:xesam/hook.git"
+        "hook": "@xesam/hook"
     }
 ```
 
-### decorate function with function
+### decorate function with another function
 
 ```javascript
+    const {decorate} = require('@xesam/hook');
     function fn() {
       console.log('fn');
     }
@@ -23,6 +32,7 @@ a simple javascript hook/decorate library.
         srcFn();
         console.log('after');
     });
+    decorated();
 ```
 
 output:
@@ -33,9 +43,10 @@ output:
     after
 ```
 
-### decorate function with param
+### decorate function with map config
 
 ```javascript
+    const {decorate} = require('@xesam/hook');
     function fn() {
       console.log('fn');
     }
@@ -47,6 +58,7 @@ output:
             console.log('after');
         }
     });
+    decorated();
 ```
 
 output:
@@ -60,6 +72,7 @@ output:
 ### hook object
 
 ```javascript
+    const {hook} = require('@xesam/hook');
    const target = {
        data: {
            name: 'hook'
