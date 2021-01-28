@@ -6,9 +6,9 @@ function _decorate(srcFn, decoration = NOP, thisArg) {
     const $ = function () {
         return decoration.apply(thisArg || srcFn, [srcFn, ...arguments]);
     };
-    let _src_ = srcFn._src_ ? srcFn._src_ : [srcFn.name];
-    _src_.push(decoration.name ? decoration.name : srcFn.name);
-    $._src_ = _src_;
+    // let _src_ = srcFn._src_ ? srcFn._src_ : [srcFn.name];
+    // _src_.push(decoration.name ? decoration.name : srcFn.name);
+    // $._src_ = _src_;
     $.decorate = function (decoration, thisArg) {
         return decorate(this, decoration, thisArg);
     };

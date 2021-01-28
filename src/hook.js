@@ -1,86 +1,44 @@
-function _check(hooks) {
-    return hooks;
+const decorate = require('./decorate');
+
+function hookAttr(currentObj, key, decoration, thisArg = currentObj) {
+    decoration = typeof decoration === 'function' ? decoration() : decoration;
+    currentObj[key] = decorate(currentObj[key], decoration, thisArg);
+    return currentObj;
 }
 
-function isFunction(f) {
-    return typeof f === 'function';
-}
-
-function _function(targetFn, hooks, thisArg) {
-    if (!_check(hooks)) {
-        return targetFn;
-    }
-    return function _function$() {
-        thisArg = thisArg || this;
-        if (hooks.before) {
-            hooks.before.call(thisArg, ...arguments);
-        }
-        try {
-            if (targetFn) {
-                targetFn.apply(thisArg, arguments);
-            }
-        } catch (e) {
-            if (hooks.afterThrow) {
-                hooks.afterThrow.call(thisArg, e);
-            } else {
-                throw e;
-            }
-        } finally {
-            if (hooks.after) {
-                hooks.after.call(thisArg, ...arguments);
-            }
-        }
-    }
-}
-
-function _object(target, hooks, thisArg) {
-    if (!_check(hooks)) {
-        return target;
-    }
-    Object.entries(hooks).forEach(([key, fn]) => {
-        if (isFunction(fn)) {
-            target[key] = _function(target[key], fn(), thisArg);
-        }
+function hookName(rootObj, name, decoration, thisArg) {
+    const _root = rootObj;
+    const keys = name.split('.');
+    const targetKey = keys.pop();
+    keys.forEach(ele => {
+        rootObj = rootObj[ele];
     });
-    return target;
+    hookAttr(rootObj, targetKey, decoration, thisArg);
+    return _root;
 }
 
-function hook(target, hooks, thisArg) {
-    if (isFunction(target)) {
-        return _function(target, hooks, thisArg);
+function hookNames(rootObj, names, decoration, thisArg) {
+    for (let name of names) {
+        hookName(rootObj, name, decoration, thisArg);
+    }
+    return rootObj;
+}
+
+function hookMulti(rootObj, decorations, thisArg) {
+    Object.entries(decorations).forEach(([key, decoration]) => {
+        hookName(rootObj, key, decoration, thisArg);
+    });
+    return rootObj;
+}
+
+function hook(rootObj, arg1, arg2, arg3) {
+    if (typeof arg1 === 'string') {
+        return hookName(rootObj, arg1, arg2, arg3);
+    } else if (arg1.constructor === Array) {
+        return hookNames(rootObj, arg1, arg2, arg3);
     } else {
-        return _object(target, hooks, thisArg);
+        return hookMulti(rootObj, arg1, arg2);
     }
 }
-
-function simple(target, names = [], hooks, thisArg) {
-    if (!_check(hooks)) {
-        return target;
-    }
-    names.forEach(ele => {
-        target[ele] = _function(target[ele], hooks, thisArg);
-    });
-    return target;
-}
-
-/**
- *
- * */
-function hookable(origin) {
-    let wrapper = function (initOpts) {
-        return origin(wrapper._hooks.reduce((opts, hooks) => {
-            return hook(opts, hooks);
-        }, initOpts));
-    };
-    wrapper._hooks = [];
-    wrapper.add = function () {
-        this._hooks.push(...arguments);
-        return this;
-    };
-    return wrapper;
-}
-
-hook.simple = simple;
-hook.hookable = hookable;
 
 module.exports = hook;

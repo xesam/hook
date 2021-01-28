@@ -1,3 +1,3 @@
-const hook = require('./src/hook');
+const hook = require('./src/hook.old');
 
 module.exports = hook;
