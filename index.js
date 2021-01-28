@@ -1,3 +1,5 @@
-const hook = require('./src/hook.old');
+const decorate = require('./src/decorate');
+const hook = require('./src/hook');
 
-module.exports = hook;
+exports.decorate = decorate;
+exports.hook = hook;
