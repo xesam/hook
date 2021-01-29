@@ -1,6 +1,6 @@
 const decorate = require('./decorate');
 
-function hookAttr(currentObj, key, decoration, thisArg = currentObj) {
+function hookAttr(currentObj, key, decoration, thisArg) {
     decoration = typeof decoration === 'function' ? decoration() : decoration;
     currentObj[key] = decorate(currentObj[key], decoration, thisArg);
     return currentObj;

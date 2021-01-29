@@ -1,23 +1,19 @@
-function NOP(src) {
-    return src();
+function NOP(src, ...args) {
+    return src(...args);
 }
 
-function _decorate(srcFn, decoration = NOP, thisArg) {
+function _function(srcFn, decoration = NOP, thisArg) {
     const $ = function () {
-        return decoration.apply(thisArg || srcFn, [srcFn, ...arguments]);
+        return decoration.call(thisArg || this, srcFn, ...arguments);
     };
-    // let _src_ = srcFn._src_ ? srcFn._src_ : [srcFn.name];
-    // _src_.push(decoration.name ? decoration.name : srcFn.name);
-    // $._src_ = _src_;
     $.decorate = function (decoration, thisArg) {
         return decorate(this, decoration, thisArg);
     };
     return $;
 }
 
-function _simple(srcFn, decoration, thisArg) {
-    return _decorate(srcFn, function () {
-        const [srcFn, ...args] = arguments;
+function _object(srcFn, decoration, thisArg) {
+    return _function(srcFn, function (srcFn, ...args) {
         if (decoration.before) {
             decoration.before.apply(this, args);
         }
@@ -44,9 +40,9 @@ function _simple(srcFn, decoration, thisArg) {
 
 function decorate(srcFn, decoration, thisArg) {
     if (!decoration || typeof decoration === 'function') {
-        return _decorate(srcFn, decoration, thisArg);
+        return _function(srcFn, decoration, thisArg);
     } else {
-        return _simple(srcFn, decoration, thisArg);
+        return _object(srcFn, decoration, thisArg);
     }
 }
 

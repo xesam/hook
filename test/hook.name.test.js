@@ -1,6 +1,6 @@
 const hook = require('../src/hook');
 
-describe('hook attr', () => {
+describe('hook', () => {
     it('none exist attr', () => {
         const onLoadHook = jest.fn();
         const targetObj = {
@@ -15,8 +15,6 @@ describe('hook attr', () => {
             }
         });
         hooked.onLoad(100, 200);
-
-        expect(onLoadHook).toBeCalled();
         expect(onLoadHook.mock.calls[0]).toEqual([{name: 'target'}, 100, 200]);
     });
     it('single attr', () => {
@@ -37,10 +35,7 @@ describe('hook attr', () => {
         });
         hooked.onLoad(100, 200);
 
-        expect(onLoadFn).toBeCalled();
         expect(onLoadFn.mock.calls[0]).toEqual([{name: 'target'}, 100, 200]);
-
-        expect(onLoadHook).toBeCalled();
         expect(onLoadHook.mock.calls[0]).toEqual([{name: 'target'}, 100, 200]);
     });
     it('nest single attr', () => {
@@ -65,24 +60,38 @@ describe('hook attr', () => {
             }
         });
         hookedLife.onLoad(100, 200);
-
-        expect(onLoadFn).toBeCalled();
         expect(onLoadFn.mock.calls[0]).toEqual([{name: 'life'}, 100, 200]);
-
-        expect(onLoadHook).toBeCalled();
         expect(onLoadHook.mock.calls[0]).toEqual([{name: 'life'}, 100, 200]);
+    });
+    it('nest single attr this', () => {
+        const onLoadFn = jest.fn();
+        const onLoadHook = jest.fn();
+        const targetObj = {
+            data: 'target.this',
+            life: {
+                data: 'life.this',
+                onLoad(a, b) {
+                    onLoadFn(this.data, a, b);
+                }
+            }
+        };
+        const hookedLife = hook(targetObj.life, 'onLoad', {
+            before(a, b) {
+                onLoadHook(this.data, a, b);
+            }
+        }, {data: "param.this"});
+
+        hookedLife.onLoad(100, 200);
+        expect(onLoadFn.mock.calls[0]).toEqual(["param.this", 100, 200]);
+        expect(onLoadHook.mock.calls[0]).toEqual(["param.this", 100, 200]);
     });
     it('nest attr', () => {
         const onLoadFn = jest.fn();
         const onLoadHook = jest.fn();
         const targetObj = {
-            data: {
-                name: 'target'
-            },
+            data: 'target.this',
             life: {
-                data: {
-                    name: 'life'
-                },
+                data: 'life.this',
                 onLoad(a, b) {
                     onLoadFn(this.data, a, b);
                 }
@@ -92,14 +101,10 @@ describe('hook attr', () => {
             before(a, b) {
                 onLoadHook(this.data, a, b);
             }
-        });
+        }, {data: "param.this"});
         hooked.life.onLoad(100, 200);
-
-        expect(onLoadFn).toBeCalled();
-        expect(onLoadFn.mock.calls[0]).toEqual([{name: 'life'}, 100, 200]);
-
-        expect(onLoadHook).toBeCalled();
-        expect(onLoadHook.mock.calls[0]).toEqual([{name: 'life'}, 100, 200]);
+        expect(onLoadFn.mock.calls[0]).toEqual(["param.this", 100, 200]);
+        expect(onLoadHook.mock.calls[0]).toEqual(["param.this", 100, 200]);
     });
 });
 
