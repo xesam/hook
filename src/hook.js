@@ -6,39 +6,54 @@ function hookAttr(root, attr, decoration, context) {
     return root;
 }
 
-function hookName(root, name, decoration, context) {
-    const sepIndex = name.indexOf('.');
+function hookName(sep, root, name, decoration, context) {
+    const sepIndex = name.indexOf(sep);
     if (sepIndex === -1) {
         hookAttr(root, name, decoration, context);
     } else {
         const childAttr = name.substring(0, sepIndex);
-        root[childAttr] = hookName(root[childAttr] || {}, name.substring(sepIndex + 1), decoration, context);
+        root[childAttr] = hookName(sep, root[childAttr] || {}, name.substring(sepIndex + 1), decoration, context);
     }
     return root;
 }
 
-function hookNames(root, names, decoration, context) {
+function createHookName(sep) {
+    return function $hookName() {
+        return hookName(sep, ...arguments)
+    }
+}
+
+function hookNames(handle, root, names, decoration, context) {
     for (let name of names) {
-        hookName(root, name, decoration, context);
+        handle(root, name, decoration, context);
     }
     return root;
 }
 
-function hookMulti(root, decorations, context) {
+function hookMulti(handle, root, decorations, context) {
     Object.entries(decorations).forEach(([name, decoration]) => {
-        hookName(root, name, decoration, context);
+        handle(root, name, decoration, context);
     });
     return root;
 }
 
-function hook(root, arg1, arg2, arg3) {
-    if (typeof arg1 === 'string') {
-        return hookName(root, arg1, arg2, arg3);
-    } else if (arg1.constructor === Array) {
-        return hookNames(root, arg1, arg2, arg3);
-    } else {
-        return hookMulti(root, arg1, arg2);
+function create(sep = '.') {
+    const handle = createHookName(sep);
+
+    function $(root, name, arg2, arg3) {
+        if (typeof name === 'string') {
+            return handle(root, name, arg2, arg3);
+        } else if (name.constructor === Array) {
+            return hookNames(handle, root, name, arg2, arg3);
+        } else {
+            return hookMulti(handle, root, name, arg2);
+        }
     }
+
+    $.create = create;
+    return $;
 }
+
+const hook = create();
 
 module.exports = hook;
