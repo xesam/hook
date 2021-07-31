@@ -2,22 +2,18 @@
 
 a simple javascript hook/decorate library.
 
+## usage
+
+```shell script
+    npm install @xesam/hook
+```
+
 ## methods 
 
 ```javascript
     const {decorate, hook} = require('@xesam/hook');
     decorate; //decorate a function,and get a new function
     hook; //hook a object's functional attribute
-```
-
-## usage
-
-### add dependency
-
-```json
-    {
-        "hook": "@xesam/hook"
-    }
 ```
 
 ### decorate function with another function
@@ -69,7 +65,7 @@ output:
     after
 ```
 
-### hook object
+### hook object attr
 
 ```javascript
     const {hook} = require('@xesam/hook');
@@ -95,7 +91,7 @@ output:
            console.log('after');
        }
    });
-   hook1();
+   hook1.onLoad();
    
    const hook2 = hook(target, 'methods.onTap', {
        before() {
@@ -105,7 +101,7 @@ output:
            console.log('after');
        }
    });
-   hook2();
+   hook2.methods.onTap();
    
    const hook3 = hook(target, ['onLoad', 'onShow'], {
        before() {
@@ -115,7 +111,7 @@ output:
            console.log('after');
        }
    });
-   hook3();
+   hook3.onLoad();
    
    const hook4 = hook(target, {
        onLoad() {
@@ -139,5 +135,5 @@ output:
            };
        }
    });
-   hook4();
+   hook4.onLoad();
 ```
