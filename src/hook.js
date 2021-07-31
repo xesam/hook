@@ -1,43 +1,43 @@
 const decorate = require('./decorate');
 
-function hookAttr(currentObj, key, decoration, thisArg) {
+function hookAttr(root, attr, decoration, context) {
     decoration = typeof decoration === 'function' ? decoration() : decoration;
-    currentObj[key] = decorate(currentObj[key], decoration, thisArg);
-    return currentObj;
+    root[attr] = decorate(root[attr], decoration, context);
+    return root;
 }
 
-function hookName(rootObj, name, decoration, thisArg) {
-    const _root = rootObj;
-    const keys = name.split('.');
-    const targetKey = keys.pop();
-    keys.forEach(ele => {
-        rootObj = rootObj[ele];
-    });
-    hookAttr(rootObj, targetKey, decoration, thisArg);
-    return _root;
-}
-
-function hookNames(rootObj, names, decoration, thisArg) {
-    for (let name of names) {
-        hookName(rootObj, name, decoration, thisArg);
-    }
-    return rootObj;
-}
-
-function hookMulti(rootObj, decorations, thisArg) {
-    Object.entries(decorations).forEach(([key, decoration]) => {
-        hookName(rootObj, key, decoration, thisArg);
-    });
-    return rootObj;
-}
-
-function hook(rootObj, arg1, arg2, arg3) {
-    if (typeof arg1 === 'string') {
-        return hookName(rootObj, arg1, arg2, arg3);
-    } else if (arg1.constructor === Array) {
-        return hookNames(rootObj, arg1, arg2, arg3);
+function hookName(root, name, decoration, context) {
+    const sepIndex = name.indexOf('.');
+    if (sepIndex === -1) {
+        hookAttr(root, name, decoration, context);
     } else {
-        return hookMulti(rootObj, arg1, arg2);
+        const childAttr = name.substring(0, sepIndex);
+        root[childAttr] = hookName(root[childAttr] || {}, name.substring(sepIndex + 1), decoration, context);
+    }
+    return root;
+}
+
+function hookNames(root, names, decoration, context) {
+    for (let name of names) {
+        hookName(root, name, decoration, context);
+    }
+    return root;
+}
+
+function hookMulti(root, decorations, context) {
+    Object.entries(decorations).forEach(([name, decoration]) => {
+        hookName(root, name, decoration, context);
+    });
+    return root;
+}
+
+function hook(root, arg1, arg2, arg3) {
+    if (typeof arg1 === 'string') {
+        return hookName(root, arg1, arg2, arg3);
+    } else if (arg1.constructor === Array) {
+        return hookNames(root, arg1, arg2, arg3);
+    } else {
+        return hookMulti(root, arg1, arg2);
     }
 }
 

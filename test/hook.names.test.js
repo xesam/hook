@@ -29,8 +29,8 @@ describe('hook attr', () => {
         expect(onLoadHook).toBeCalledTimes(2);
         expect(onLoadHook.mock.calls[0]).toEqual([{name: 'target'}, 100, 200]);
     });
+
     it('nest nest names', () => {
-        const onLoadFn = jest.fn();
         const onLoadHook = jest.fn();
         const targetObj = {
             data: {
@@ -39,12 +39,6 @@ describe('hook attr', () => {
             life: {
                 data: {
                     name: 'life'
-                },
-                onLoad(a, b) {
-                    onLoadFn(this.data, a, b);
-                },
-                onShow(a, b) {
-                    onLoadFn(this.data, a, b);
                 }
             }
         };
@@ -56,11 +50,43 @@ describe('hook attr', () => {
         hooked.life.onLoad(100, 200);
         hooked.life.onShow(100, 200);
 
-        expect(onLoadFn).toBeCalledTimes(2);
-        expect(onLoadFn.mock.calls[0]).toEqual([{name: 'life'}, 100, 200]);
+        expect(onLoadHook).toBeCalledTimes(2);
+        expect(onLoadHook.mock.calls[0]).toEqual([{name: 'life'}, 100, 200]);
+    });
+
+    it('multi', () => {
+        const onLoadHook = jest.fn();
+        const targetObj = {
+            data: {
+                name: 'target'
+            },
+            life: {
+                data: {
+                    name: 'life'
+                }
+            }
+        };
+        const hooked = hook(targetObj, {
+            'life.onLoad': {
+                before(a, b) {
+                    onLoadHook(this.data, a, b);
+                }
+            },
+
+            'life.onShow'() {
+                return {
+                    before(a, b) {
+                        onLoadHook(this.data, a, b);
+                    }
+                }
+            }
+        });
+        hooked.life.onLoad(100, 200);
+        hooked.life.onShow(300, 400);
 
         expect(onLoadHook).toBeCalledTimes(2);
         expect(onLoadHook.mock.calls[0]).toEqual([{name: 'life'}, 100, 200]);
+        expect(onLoadHook.mock.calls[1]).toEqual([{name: 'life'}, 300, 400]);
     });
 });
 
