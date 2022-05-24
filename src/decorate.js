@@ -28,7 +28,7 @@ function _object(srcFn, decoration, context) {
                 }
                 return retObj;
             } catch (e) {
-                decoration.afterThrow.call(this, [e].concat(args));
+                decoration.afterThrow.apply(this, [e].concat(args));
             }
         } else {
             let retObj = null;
