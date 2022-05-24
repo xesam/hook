@@ -21,12 +21,14 @@ a simple javascript hook/decorate library.
 ```javascript
     const {decorate} = require('@xesam/hook');
     function fn() {
-      console.log('fn');
+        console.log('fn');
+        return 'a';
     }
     const decorated = decorate(fn, function(srcFn) {
         console.log('before');
-        srcFn();
+        const ret = srcFn();
         console.log('after');
+        return ret;
     });
     decorated();
 ```
@@ -39,7 +41,7 @@ output:
     after
 ```
 
-### decorate function with map config
+### decorate function with object
 
 ```javascript
     const {decorate} = require('@xesam/hook');
@@ -51,9 +53,9 @@ output:
         before(a, b) {
             console.log('before');
         },
-        after(res, a, b) {
+        after(res, a, b) { // res = fn(100, 200)
             console.log('after');
-            return res; // res = fn(100, 200)
+            return res;
         }
     });
     decorated(100, 200);
@@ -86,10 +88,10 @@ output:
        }
    };
    const hook1 = hook(target, 'onLoad', {
-       before() {
+       before(query) {
            console.log('before');
        },
-       after(res) {
+       after(res, query) {
            console.log('after');
            return res;
        }
@@ -97,10 +99,10 @@ output:
    hook1.onLoad();
    
    const hook2 = hook(target, 'methods.onTap', {
-       before() {
+       before(query) {
            console.log('before');
        },
-       after(res) {
+       after(res, query) {
            console.log('after');
            return res;
        }
@@ -108,10 +110,10 @@ output:
    hook2.methods.onTap();
    
    const hook3 = hook(target, ['onLoad', 'onShow'], {
-       before() {
+       before(query) {
            console.log('before');
        },
-       after(res) {
+       after(res, query) {
            console.log('after');
            return res;
        }
@@ -121,10 +123,10 @@ output:
    const hook4 = hook(target, {
        onLoad() {
            return {
-               before() {
+               before(query) {
                    console.log('before');
                },
-               after(res) {
+               after(res, query) {
                    console.log('after');
            return res;
                }
