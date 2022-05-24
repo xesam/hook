@@ -12,8 +12,8 @@ a simple javascript hook/decorate library.
 
 ```javascript
     const {decorate, hook} = require('@xesam/hook');
-    decorate; //decorate a function,and get a new function
-    hook; //hook a object's functional attribute
+    decorate(...); //decorate a function,and get a new function
+    hook(...); //hook a object's functional attribute
 ```
 
 ### decorate function with another function
@@ -43,18 +43,20 @@ output:
 
 ```javascript
     const {decorate} = require('@xesam/hook');
-    function fn() {
-      console.log('fn');
+    function fn(a, b) {
+        console.log('fn');
+        return a + b;
     }
     const decorated = decorate(fn, {
-        before() {
+        before(a, b) {
             console.log('before');
         },
-        after() {
+        after(res, a, b) {
             console.log('after');
+            return res; // res = fn(100, 200)
         }
     });
-    decorated();
+    decorated(100, 200);
 ```
 
 output:
@@ -87,8 +89,9 @@ output:
        before() {
            console.log('before');
        },
-       after() {
+       after(res) {
            console.log('after');
+           return res;
        }
    });
    hook1.onLoad();
@@ -97,8 +100,9 @@ output:
        before() {
            console.log('before');
        },
-       after() {
+       after(res) {
            console.log('after');
+           return res;
        }
    });
    hook2.methods.onTap();
@@ -107,8 +111,9 @@ output:
        before() {
            console.log('before');
        },
-       after() {
+       after(res) {
            console.log('after');
+           return res;
        }
    });
    hook3.onLoad();
@@ -119,8 +124,9 @@ output:
                before() {
                    console.log('before');
                },
-               after() {
+               after(res) {
                    console.log('after');
+           return res;
                }
            };
        },
@@ -129,8 +135,9 @@ output:
                before() {
                    console.log('before');
                },
-               after() {
+               after(res) {
                    console.log('after');
+                   return res;
                }
            };
        }

@@ -17,23 +17,28 @@ function _object(srcFn, decoration, context) {
         if (decoration.before) {
             decoration.before.apply(this, args);
         }
-        let err = false;
-        try {
+        if (decoration.afterThrow) {
+            try {
+                let retObj = null;
+                if (src) {
+                    retObj = src.apply(this, args);
+                }
+                if (decoration.after) {
+                    retObj = decoration.after.apply(this, [retObj].concat(args));
+                }
+                return retObj;
+            } catch (e) {
+                decoration.afterThrow.call(this, [e].concat(args));
+            }
+        } else {
+            let retObj = null;
             if (src) {
-                src.apply(this, args);
+                retObj = src.apply(this, args);
             }
-        } catch (e) {
-            err = true;
-            if (decoration.afterThrow) {
-                decoration.afterThrow.call(this, e.message, args);
-            } else {
-                throw e;
-            }
-        }
-        if (!err) {
             if (decoration.after) {
-                decoration.after.apply(this, args);
+                retObj = decoration.after.apply(this, [retObj].concat(args));
             }
+            return retObj;
         }
     }, context);
 }

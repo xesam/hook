@@ -101,7 +101,7 @@ describe('decorate', () => {
     });
 
     it('decorate#_object', () => {
-        const srcFn = jest.fn();
+        const srcFn = jest.fn().mockReturnValue('this is src');
         const beforeCallback = jest.fn();
         const afterCallback = jest.fn();
 
@@ -109,15 +109,17 @@ describe('decorate', () => {
             before(a, b) {
                 beforeCallback(a, b);
             },
-            after(a, b) {
+            after(res, a, b) {
                 afterCallback(a, b);
+                return res;
             }
         });
-        decorated(100, 200);
+        const finalResult = decorated(100, 200);
 
         expect(beforeCallback).toBeCalledTimes(1);
         expect(srcFn).toBeCalledTimes(1);
         expect(afterCallback).toBeCalledTimes(1);
+        expect(finalResult).toEqual("this is src");
     });
 
     it('decorate#_object chain', () => {
@@ -129,7 +131,7 @@ describe('decorate', () => {
             before(a, b) {
                 beforeCallback(a, b);
             },
-            after(a, b) {
+            after(res, a, b) {
                 afterCallback(a, b);
             }
         });
@@ -164,7 +166,7 @@ describe('decorate', () => {
             before(a, b) {
                 beforeCallback(this.extra, a, b);
             },
-            after(a, b) {
+            after(res, a, b) {
                 afterCallback(this.extra, a, b);
             }
         });
@@ -192,7 +194,7 @@ describe('decorate', () => {
             before(a, b) {
                 beforeCallback(this.name, a, b);
             },
-            after(a, b) {
+            after(res, a, b) {
                 afterCallback(this.name, a, b);
             }
         }, thisArg);
