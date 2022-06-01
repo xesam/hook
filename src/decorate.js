@@ -2,8 +2,11 @@ function NOP(src, ...args) {
     return src(...args);
 }
 
-function _function(srcFn, decoration = NOP, context) {
+function _function(srcFn, decoration, context) {
     const $ = function () {
+        if (!decoration) {
+            decoration = NOP;
+        }
         return decoration.call(context || this, srcFn, ...arguments);
     };
     $.decorate = function (decoration, context) {
