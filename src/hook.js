@@ -7,7 +7,9 @@ function hookAttr(root, attr, decoration, context) {
     if (typeof decoration === 'function') {
         decoration = decoration();
     }
-    root[attr] = decorate(root[attr], decoration, context);
+    if (decoration) {
+        root[attr] = decorate(root[attr], decoration, context);
+    }
     return root;
 }
 
