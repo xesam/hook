@@ -4,7 +4,9 @@ const decorate = require('./decorate');
  * hookAttr(root, 'say', decoration, context)
  * */
 function hookAttr(root, attr, decoration, context) {
-    decoration = typeof decoration === 'function' ? decoration() : decoration;
+    if (typeof decoration === 'function') {
+        decoration = decoration();
+    }
     root[attr] = decorate(root[attr], decoration, context);
     return root;
 }
@@ -25,14 +27,25 @@ function hookName(sep, root, name, decoration, context) {
     return root;
 }
 
+/**
+ * hookNames('.', root, ['a','b','c.d','methods.a.b.c.d.e'], decoration, context)
+ * */
 function hookNames(handle, root, names, decoration, context) {
-    for (let name of names) {
+    for (const name of names) {
         handle(root, name, decoration, context);
     }
     return root;
 }
 
-function hookMulti(handle, root, decorations, context) {
+/**
+ * hookWithDecorations('.', root, {
+ *  'a':{ before:function(){}, after:function(){}}
+ *  'b':{ before:function(){}, after:function(){}}
+ *  'c.d':{ before:function(){}, after:function(){}}
+ *  'methods.a.b.c.d.e':{ before:function(){}, after:function(){}}
+ * }, context)
+ * */
+function hookWithDecorations(handle, root, decorations, context) {
     Object.entries(decorations).forEach(([name, decoration]) => {
         handle(root, name, decoration, context);
     });
@@ -54,7 +67,7 @@ function create(sep = '.') {
         } else if (name.constructor === Array) {
             return hookNames(handle, root, name, arg2, arg3);
         } else {
-            return hookMulti(handle, root, name, arg2);
+            return hookWithDecorations(handle, root, name, arg2);
         }
     }
 

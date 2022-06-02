@@ -1,7 +1,7 @@
 const hook = require('../src/hook');
 
 describe('hook attr', () => {
-    it('single names', () => {
+    it('names', () => {
         const onLoadFn = jest.fn();
         const onLoadHook = jest.fn();
         const targetObj = {
@@ -30,7 +30,7 @@ describe('hook attr', () => {
         expect(onLoadHook.mock.calls[0]).toEqual([{name: 'target'}, 100, 200]);
     });
 
-    it('nest nest names', () => {
+    it('compound names', () => {
         const onLoadHook = jest.fn();
         const targetObj = {
             data: {
@@ -54,7 +54,7 @@ describe('hook attr', () => {
         expect(onLoadHook.mock.calls[0]).toEqual([{name: 'life'}, 100, 200]);
     });
 
-    it('multi', () => {
+    it('decorations', () => {
         const onLoadHook = jest.fn();
         const targetObj = {
             data: {

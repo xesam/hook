@@ -2,6 +2,9 @@ function NOP(src, ...args) {
     return src(...args);
 }
 
+/**
+ * _function(srcFn, function(src, ...args){}, context)
+ * */
 function _function(srcFn, decoration, context) {
     const $ = function () {
         if (!decoration) {
@@ -15,6 +18,13 @@ function _function(srcFn, decoration, context) {
     return $;
 }
 
+/**
+ * _object(srcFn, {
+ *   before:function(){},
+ *   after:function(){},
+ *   afterThrow:function(){}
+ * }, context)
+ * */
 function _object(srcFn, decoration, context) {
     return _function(srcFn, function (src, ...args) {
         if (decoration.before) {

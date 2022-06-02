@@ -50,7 +50,7 @@ describe('hook', () => {
         expect(onLoadHook.mock.calls[0]).toEqual([{name: 'life'}, 100, 200]);
     });
 
-    it('nest single attr 2', () => {
+    it('compound single attr 2', () => {
         const onLoadFn = jest.fn();
         const onLoadHook = jest.fn();
         const targetObj = {
@@ -94,7 +94,7 @@ describe('hook', () => {
         expect(onLoadHook.mock.calls[0]).toEqual([{name: 'target'}, 100, 200]);
     });
 
-    it('none exist nest attr', () => {
+    it('none exist compound attr', () => {
         const onLoadHook = jest.fn();
         const targetObj = {
             data: {
@@ -111,7 +111,7 @@ describe('hook', () => {
         expect(onLoadHook.mock.calls[0]).toEqual([{name: 'target'}, 100, 200]);
     });
 
-    it('nest single attr with this', () => {
+    it('compound attr with this', () => {
         const onLoadFn = jest.fn();
         const onLoadHook = jest.fn();
         const targetObj = {

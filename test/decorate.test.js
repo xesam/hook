@@ -1,27 +1,29 @@
 const decorate = require('../src/decorate');
 
 describe('decorate', () => {
-    it('decorate#_function empty', () => {
+    it('decorate#_function without decoration', () => {
         const srcFn = jest.fn();
         const decorated = decorate(srcFn);
         decorated(100, 200);
         expect(srcFn.mock.calls[0]).toEqual([100, 200]);
     });
 
-    it('decorate#_function empty with global this', () => {
-        const srcFn = jest.fn();
+    it('decorate#_function with decoration 1', () => {
         global.name = 'global.extra';
+        const srcFn = jest.fn();
+        const testFn = jest.fn();
 
-        function decoration(a, b) {
-            srcFn(this.name, a, b);
+        function decoration(src, a, b) {
+            testFn(this.name, a, b);
         }
 
-        const decorated = decorate(decoration);
+        const decorated = decorate(srcFn, decoration);
         decorated(100, 200);
-        expect(srcFn.mock.calls[0]).toEqual(['global.extra', 100, 200]);
+        expect(srcFn).toBeCalledTimes(0);
+        expect(testFn.mock.calls[0]).toEqual(['global.extra', 100, 200]);
     });
 
-    it('decorate#_function function', () => {
+    it('decorate#_function with decoration 2', () => {
         const srcFn = jest.fn();
         const beforeCallback = jest.fn();
         const afterCallback = jest.fn();
@@ -46,24 +48,28 @@ describe('decorate', () => {
         const beforeCallback = jest.fn();
         const afterCallback = jest.fn();
 
-        let decorated = decorate(srcFn, function (src, a, b) {
-            beforeCallback(a, b);
-            src(a, b);
-            afterCallback(a, b);
-        });
-        decorated = decorated.decorate(function (src, a, b) {
-            beforeCallback(a, b);
-            src(a, b);
-            afterCallback(a, b);
+        const decorated = decorate(srcFn, function (src, a, b) {
+            beforeCallback(a, b);// 3st
+            src(a, b); // 4st
+            afterCallback(a, b); // 5st
+        }).decorate(function (src, a, b) {
+            beforeCallback(a, b + 1); // 1st
+            src(a, b); // 2st
+            afterCallback(a, b + 1);// 6st
         });
         decorated(100, 200);
 
         expect(beforeCallback).toBeCalledTimes(2);
+        expect(beforeCallback.mock.calls[0]).toEqual([100, 201]);
+        expect(beforeCallback.mock.calls[1]).toEqual([100, 200]);
         expect(srcFn).toBeCalledTimes(1);
+        expect(srcFn.mock.calls[0]).toEqual([100, 200]);
         expect(afterCallback).toBeCalledTimes(2);
+        expect(afterCallback.mock.calls[0]).toEqual([100, 200]);
+        expect(afterCallback.mock.calls[1]).toEqual([100, 201]);
     });
 
-    it('decorate#_function with this', () => {
+    it('decorate#_function with default this', () => {
         const mockFn = jest.fn();
         global.extra = 'global.extra';
 
@@ -80,7 +86,7 @@ describe('decorate', () => {
         expect(mockFn.mock.calls[0]).toEqual(['global.extra', 'global.extra', 100]);
     });
 
-    it('decorate#_function with extra this', () => {
+    it('decorate#_function with extra context', () => {
         const mockFn = jest.fn();
         global.extra = 'global.extra';
 
