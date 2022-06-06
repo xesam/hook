@@ -5,7 +5,7 @@ const decorate = require('./decorate');
  * */
 function hookAttr(root, attr, decoration, context) {
     if (typeof decoration === 'function') {
-        decoration = decoration();
+        decoration = decoration.call(context || root, root);
     }
     if (decoration) {
         root[attr] = decorate(root[attr], decoration, context);
@@ -40,15 +40,15 @@ function hookNames(handle, root, names, decoration, context) {
 }
 
 /**
- * hookWithDecorations('.', root, {
+ * hookWithCompoundDecoration('.', root, {
  *  'a':{ before:function(){}, after:function(){}}
  *  'b':{ before:function(){}, after:function(){}}
  *  'c.d':{ before:function(){}, after:function(){}}
  *  'methods.a.b.c.d.e':{ before:function(){}, after:function(){}}
  * }, context)
  * */
-function hookWithDecorations(handle, root, decorations, context) {
-    Object.entries(decorations).forEach(([name, decoration]) => {
+function hookWithNamedDecoration(handle, root, namedDecoration, context) {
+    Object.entries(namedDecoration).forEach(([name, decoration]) => {
         handle(root, name, decoration, context);
     });
     return root;
@@ -66,10 +66,10 @@ function create(sep = '.') {
     function $(root, name, arg2, arg3) {
         if (typeof name === 'string') {
             return handle(root, name, arg2, arg3);
-        } else if (name.constructor === Array) {
+        } else if (Array.isArray(name)) {
             return hookNames(handle, root, name, arg2, arg3);
         } else {
-            return hookWithDecorations(handle, root, name, arg2);
+            return hookWithNamedDecoration(handle, root, name, arg2);
         }
     }
 

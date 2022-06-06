@@ -24,6 +24,51 @@ describe('hook', () => {
         expect(onLoadHook.mock.calls[0]).toEqual([{name: 'target'}, 100, 200]);
     });
 
+    it('single attr with void 1', () => {
+        const onLoadFn = jest.fn();
+        const targetObj = {
+            data: {
+                name: 'target'
+            },
+            onLoad(a, b) {
+                onLoadFn(this.data, a, b);
+            }
+        };
+        const hooked = hook(targetObj, 'onShow');
+        expect(hooked.onShow).toBeUndefined();
+    });
+
+    it('single attr with void 2', () => {
+        const onLoadFn = jest.fn();
+        const targetObj = {
+            data: {
+                name: 'target'
+            },
+            onLoad(a, b) {
+                onLoadFn(this.data, a, b);
+            }
+        };
+        const hooked = hook(targetObj, 'onShow', function () {
+        });
+        expect(hooked.onShow).toBeUndefined();
+    });
+
+    it('single attr with void 3', () => {
+        const onLoadFn = jest.fn();
+        const targetObj = {
+            data: {
+                name: 'target'
+            },
+            onLoad(a, b) {
+                onLoadFn(this.data, a, b);
+            }
+        };
+        const hooked = hook(targetObj, 'onShow', function () {
+            return {};
+        });
+        expect(hooked.onShow).not.toBeUndefined();
+    });
+
     it('nest single attr 1', () => {
         const onLoadFn = jest.fn();
         const onLoadHook = jest.fn();
