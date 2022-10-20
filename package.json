@@ -1,7 +1,7 @@
 {
   "name": "@xesam/hook",
-  "version": "0.1.5",
-  "description": "a simple javascript decorate/hook library",
+  "version": "0.1.6",
+  "description": "a simple javascript decorate/hook helper",
   "main": "src/index.js",
   "directories": {
     "test": "test"
