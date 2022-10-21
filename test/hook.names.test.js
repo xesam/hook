@@ -91,7 +91,7 @@ describe('hook multi names', () => {
         expect(res).toStrictEqual({name: 'afterReturn.value'});
     });
 
-    it("when hook rawObj with decoration then hook lifetimes.created and hook lifetimes.ready", () => {
+    it("when hook rawObj with config-object then hook lifetimes.created and hook lifetimes.ready", () => {
         const onHookMock = jest.fn();
         const hooked = hook(rawObj, {
             'lifetimes.created': {
