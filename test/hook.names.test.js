@@ -1,92 +1,100 @@
 const hook = require('../src/hook');
 
-describe('hook attr', () => {
-    it('names', () => {
-        const onLoadFn = jest.fn();
-        const onLoadHook = jest.fn();
-        const targetObj = {
+describe('hook multi names', () => {
+    let rawObj;
+    let onLoadMock;
+    let onShowMock;
+    let onLifetimeCreateMock;
+    let onLifetimeReadyMock;
+    beforeEach(() => {
+        onLoadMock = jest.fn();
+        onShowMock = jest.fn();
+        onLifetimeCreateMock = jest.fn();
+        onLifetimeReadyMock = jest.fn();
+        rawObj = {
+            name: 'rawObj.value',
             data: {
-                name: 'target'
+                name: 'rawObj.data.value'
             },
             onLoad(a, b) {
-                onLoadFn(this.data, a, b);
+                onLoadMock(this.name, this.data, a, b);
             },
-            onShow(a, b) {
-                onLoadFn(this.data, a, b);
+            onShow() {
+                onShowMock(this.name, this.data);
+            },
+            lifetimes: {
+                name: 'lifetimes.value',
+                data: {
+                    name: 'lifetimes.data.value'
+                },
+                created(a, b) {
+                    onLifetimeCreateMock(this.name, this.data, a, b);
+                },
+                ready() {
+                    onLifetimeReadyMock(this.name, this.data);
+                }
             }
         };
-        const hooked = hook(targetObj, ['onLoad', 'onShow'], {
+    })
+    it("when hook rawObj with ['onLoad', 'onShow'] then hook onLoad and hook onShow", () => {
+        const onHookMock = jest.fn();
+        const hooked = hook(rawObj, ['onLoad', 'onShow'], {
             before(a, b) {
-                onLoadHook(this.data, a, b);
+                onHookMock(this.data, a, b);
             }
         });
         hooked.onLoad(100, 200);
-        hooked.onShow(100, 200);
+        hooked.onShow(300, 400);
 
-        expect(onLoadFn).toBeCalledTimes(2);
-        expect(onLoadFn.mock.calls[0]).toEqual([{name: 'target'}, 100, 200]);
-
-        expect(onLoadHook).toBeCalledTimes(2);
-        expect(onLoadHook.mock.calls[0]).toEqual([{name: 'target'}, 100, 200]);
+        expect(onHookMock).toBeCalledTimes(2);
+        expect(onHookMock.mock.calls[0]).toEqual([{name: 'rawObj.data.value'}, 100, 200]);
+        expect(onHookMock.mock.calls[1]).toEqual([{name: 'rawObj.data.value'}, 300, 400]);
+        expect(onLoadMock.mock.calls[0]).toEqual(['rawObj.value', {name: 'rawObj.data.value'}, 100, 200]);
+        expect(onShowMock.mock.calls[0]).toEqual(['rawObj.value', {name: 'rawObj.data.value'}]);
     });
 
-    it('compound names', () => {
-        const onLoadHook = jest.fn();
-        const targetObj = {
-            data: {
-                name: 'target'
-            },
-            life: {
-                data: {
-                    name: 'life'
-                }
-            }
-        };
-        const hooked = hook(targetObj, ['life.onLoad', 'life.onShow'], {
+    it("when hook rawObj with ['lifetimes.created', 'lifetimes.ready'] then hook lifetimes.created and hook lifetimes.ready", () => {
+        const onHookMock = jest.fn();
+        const hooked = hook(rawObj, ['lifetimes.created', 'lifetimes.ready'], {
             before(a, b) {
-                onLoadHook(this.data, a, b);
+                onHookMock(this.data, a, b);
             }
         });
-        hooked.life.onLoad(100, 200);
-        hooked.life.onShow(100, 200);
+        hooked.lifetimes.created(100, 200);
+        hooked.lifetimes.ready(300, 400);
 
-        expect(onLoadHook).toBeCalledTimes(2);
-        expect(onLoadHook.mock.calls[0]).toEqual([{name: 'life'}, 100, 200]);
+        expect(onHookMock).toBeCalledTimes(2);
+        expect(onHookMock.mock.calls[0]).toEqual([{name: 'lifetimes.data.value'}, 100, 200]);
+        expect(onHookMock.mock.calls[1]).toEqual([{name: 'lifetimes.data.value'}, 300, 400]);
+        expect(onLifetimeCreateMock.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}, 100, 200]);
+        expect(onLifetimeReadyMock.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}]);
     });
 
-    it('decorations', () => {
-        const onLoadHook = jest.fn();
-        const targetObj = {
-            data: {
-                name: 'target'
-            },
-            life: {
-                data: {
-                    name: 'life'
-                }
-            }
-        };
-        const hooked = hook(targetObj, {
-            'life.onLoad': {
+    it("when hook rawObj with decoration then hook lifetimes.created and hook lifetimes.ready", () => {
+        const onHookMock = jest.fn();
+        const hooked = hook(rawObj, {
+            'lifetimes.created': {
                 before(a, b) {
-                    onLoadHook(this.data, a, b);
+                    onHookMock(this.data, a, b);
                 }
             },
 
-            'life.onShow'() {
+            'lifetimes.ready'() {
                 return {
                     before(a, b) {
-                        onLoadHook(this.data, a, b);
+                        onHookMock(this.data, a, b);
                     }
                 }
             }
         });
-        hooked.life.onLoad(100, 200);
-        hooked.life.onShow(300, 400);
+        hooked.lifetimes.created(100, 200);
+        hooked.lifetimes.ready(300, 400);
 
-        expect(onLoadHook).toBeCalledTimes(2);
-        expect(onLoadHook.mock.calls[0]).toEqual([{name: 'life'}, 100, 200]);
-        expect(onLoadHook.mock.calls[1]).toEqual([{name: 'life'}, 300, 400]);
+        expect(onHookMock).toBeCalledTimes(2);
+        expect(onHookMock.mock.calls[0]).toEqual([{name: 'lifetimes.data.value'}, 100, 200]);
+        expect(onHookMock.mock.calls[1]).toEqual([{name: 'lifetimes.data.value'}, 300, 400]);
+        expect(onLifetimeCreateMock.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}, 100, 200]);
+        expect(onLifetimeReadyMock.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}]);
     });
 });
 
