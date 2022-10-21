@@ -70,6 +70,27 @@ describe('hook multi names', () => {
         expect(onLifetimeReadyMock.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}]);
     });
 
+    it("when hook rawObj with function-object then pass arguments to onLoad", () => {
+        const onHookMock = jest.fn();
+        const hooked = hook(rawObj, {
+            onLoad() {
+                return {
+                    before(a, b) {
+                        onHookMock(this.data, a, b);
+                    },
+                    afterReturn(result, a, b) {
+                        onHookMock(result, this.data, a, b);
+                        return {name: 'afterReturn.value'}
+                    }
+                }
+            }
+        });
+        const res = hooked.onLoad(100, 200);
+        expect(onHookMock.mock.calls[0]).toEqual([{name: 'rawObj.data.value'}, 100, 200]);
+        expect(onHookMock.mock.calls[1]).toEqual([undefined, {name: 'rawObj.data.value'}, 100, 200]);
+        expect(res).toStrictEqual({name: 'afterReturn.value'});
+    });
+
     it("when hook rawObj with decoration then hook lifetimes.created and hook lifetimes.ready", () => {
         const onHookMock = jest.fn();
         const hooked = hook(rawObj, {
