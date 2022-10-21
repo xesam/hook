@@ -12,8 +12,8 @@ function _function(srcFn, decoration, context) {
         }
         return decoration.call(context || this, srcFn, ...arguments);
     };
-    $.decorate = function (decoration, context) {
-        return decorate(this, decoration, context);
+    $.decorate = function (otherDecoration, otherContext) {
+        return decorate(this, otherDecoration, otherContext);
     };
     return $;
 }
