@@ -1,6 +1,6 @@
 # js hook
 
-a simple javascript hook/decorate library.
+a simple javascript decorate/hook library.
 
 ## usage
 
@@ -12,7 +12,7 @@ a simple javascript hook/decorate library.
 
 ```javascript
     const {decorate, hook} = require('@xesam/hook');
-    decorate(...); //decorate a function,and get a new function
+    decorate(...); //decorate a function, and get a new function
     hook(...); //hook a object's functional attribute
 ```
 
@@ -53,7 +53,7 @@ output:
         before(a, b) {
             console.log('before');
         },
-        after(res, a, b) { // res = fn(100, 200)
+        afterReturn(res, a, b) { // res = fn(100, 200)
             console.log('after');
             return res;
         }
@@ -91,7 +91,7 @@ output:
        before(query) {
            console.log('before');
        },
-       after(res, query) {
+       afterReturn(res, query) {
            console.log('after');
            return res;
        }
@@ -102,7 +102,7 @@ output:
        before(query) {
            console.log('before');
        },
-       after(res, query) {
+       afterReturn(res, query) {
            console.log('after');
            return res;
        }
@@ -113,7 +113,7 @@ output:
        before(query) {
            console.log('before');
        },
-       after(res, query) {
+       afterReturn(res, query) {
            console.log('after');
            return res;
        }
@@ -126,7 +126,7 @@ output:
                before(query) {
                    console.log('before');
                },
-               after(res, query) {
+               afterReturn(res, query) {
                    console.log('after');
            return res;
                }
@@ -137,7 +137,7 @@ output:
                before() {
                    console.log('before');
                },
-               after(res) {
+               afterReturn(res) {
                    console.log('after');
                    return res;
                }
@@ -146,3 +146,9 @@ output:
    });
    hook4.onLoad();
 ```
+
+### ChangeLogs
+
+#### 0.1.6
+
+1. add afterReturn config.
