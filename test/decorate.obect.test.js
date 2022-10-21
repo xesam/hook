@@ -33,7 +33,7 @@ describe('decorate with object', () => {
         expect(finalReturn).toStrictEqual({srcName: 'srcFn.name', afterReturnName: 'afterReturn.name'});
     });
 
-    it("when after is provided then return the after's return", () => {
+    it("when after is provided then return the srcFn's return", () => {
         const srcFn = jest.fn().mockReturnValue({srcName: 'srcFn.name'});
         let decorated = decorate(srcFn, {
             after(rawReturn) {
@@ -45,12 +45,11 @@ describe('decorate with object', () => {
         });
         const finalReturn = decorated(100, 200);
         expect(finalReturn).toStrictEqual({
-            srcName: 'srcFn.name',
-            afterName: 'after.name'
+            srcName: 'srcFn.name'
         });
     });
 
-    it("when afterReturn and after are provided then return the after's return", () => {
+    it("when afterReturn and after are provided then return the afterReturn's return", () => {
         const srcFn = jest.fn().mockReturnValue({srcName: 'srcFn.name'});
         let decorated = decorate(srcFn, {
             afterReturn(rawReturn) {
@@ -69,26 +68,8 @@ describe('decorate with object', () => {
         const finalReturn = decorated(100, 200);
         expect(finalReturn).toStrictEqual({
             srcName: 'srcFn.name',
-            afterReturnName: 'afterReturn.name',
-            afterName: 'after.name'
+            afterReturnName: 'afterReturn.name'
         });
-    });
-
-    it("when after is provided then return the after's return", () => {
-        const srcFn = jest.fn().mockReturnValue({rawKey: 'rawValue'});
-        const afterCallback = jest.fn().mockReturnValue({afterKey: 'afterValue'});
-
-        let decorated = decorate(srcFn, {
-            after(rawReturn, a, b) {
-                const afterReturn = afterCallback(a, b);
-                return {
-                    ...rawReturn,
-                    ...afterReturn
-                };
-            }
-        });
-        const finalReturn = decorated(100, 200);
-        expect(finalReturn).toStrictEqual({rawKey: 'rawValue', afterKey: 'afterValue'});
     });
 
     it('when chain-decorate then chain call', () => {
@@ -100,21 +81,21 @@ describe('decorate with object', () => {
 
         const srcFn = pushArgument;
         const beforeCallback = pushArgument;
-        const afterCallback = pushArgument;
+        const afterReturnCallback = pushArgument;
 
         const decorated = decorate(srcFn, {
             before(a, b) {
                 beforeCallback(1, a, b);
             },
-            after(rawReturn, a, b) {
-                afterCallback(2, a, b);
+            afterReturn(rawReturn, a, b) {
+                afterReturnCallback(2, a, b);
             }
         }).decorate({
             before(a, b) {
                 beforeCallback(3, a, b);
             },
-            after(rawReturn, a, b) {
-                afterCallback(4, a, b);
+            afterReturn(rawReturn, a, b) {
+                afterReturnCallback(4, a, b);
             }
         });
         decorated(100, 200);
@@ -133,7 +114,7 @@ describe('decorate with object', () => {
 
         const rawFn = jest.fn();
         const beforeCallback = jest.fn();
-        const afterCallback = jest.fn();
+        const afterReturnCallback = jest.fn();
 
         function srcFn(a, b) {
             rawFn(this.extra, a, b);
@@ -144,15 +125,15 @@ describe('decorate with object', () => {
             before(a, b) {
                 beforeCallback(this.extra, a, b);
             },
-            after(res, a, b) {
-                afterCallback(this.extra, a, b);
+            afterReturn(res, a, b) {
+                afterReturnCallback(this.extra, a, b);
             }
         });
         decorated(100, 200);
 
         expect(beforeCallback.mock.calls[0]).toEqual(['global.extra', 100, 200]);
         expect(rawFn.mock.calls[0]).toEqual(['global.extra', 100, 200]);
-        expect(afterCallback.mock.calls[0]).toEqual(['global.extra', 100, 200]);
+        expect(afterReturnCallback.mock.calls[0]).toEqual(['global.extra', 100, 200]);
     });
 
     it('when decorate with extra context then use extra context', () => {
@@ -160,7 +141,7 @@ describe('decorate with object', () => {
 
         const rawFn = jest.fn();
         const beforeCallback = jest.fn();
-        const afterCallback = jest.fn();
+        const afterReturnCallback = jest.fn();
 
         function fn(a, b) {
             rawFn(this.name, a, b);
@@ -175,33 +156,53 @@ describe('decorate with object', () => {
             before(a, b) {
                 beforeCallback(this.name, a, b);
             },
-            after(res, a, b) {
-                afterCallback(this.name, a, b);
+            afterReturn(res, a, b) {
+                afterReturnCallback(this.name, a, b);
             }
         }, thisArg);
         decorated(100, 200);
 
         expect(beforeCallback.mock.calls[0]).toEqual(['param.extra', 100, 200]);
         expect(rawFn.mock.calls[0]).toEqual(['param.extra', 100, 200]);
-        expect(afterCallback.mock.calls[0]).toEqual(['param.extra', 100, 200]);
+        expect(afterReturnCallback.mock.calls[0]).toEqual(['param.extra', 100, 200]);
     });
 
-    it('when raw-function throw error then before is called then afterThrow is called then after is called', () => {
+    it('when raw-function throw error and afterThrow intercept error then after is called', () => {
+        const afterThrowCallback = jest.fn().mockReturnValue(true);
         const afterCallback = jest.fn();
-        const afterThrowCallback = jest.fn();
 
         function rawFn() {
             throw {msg: 'rawFn.error'};
         }
 
         const decorated = decorate(rawFn, {
-            after: afterCallback,
-            afterThrow: afterThrowCallback
+            afterThrow: afterThrowCallback,
+            after: afterCallback
         });
         decorated(100, 200);
         expect(afterThrowCallback).toBeCalled();
         expect(afterThrowCallback.mock.calls[0][0]).toStrictEqual({msg: 'rawFn.error'});
         expect(afterCallback).toBeCalled();
+    });
+
+    it('when raw-function throw error and afterThrow do not intercept error then after is not called', () => {
+        const afterThrowCallback = jest.fn().mockReturnValue(false);
+        const afterCallback = jest.fn();
+
+        function rawFn() {
+            throw {msg: 'rawFn.error'};
+        }
+
+        const decorated = decorate(rawFn, {
+            afterThrow: afterThrowCallback,
+            after: afterCallback
+        });
+        expect(() => {
+            decorated(100, 200);
+        }).toThrow();
+        expect(afterThrowCallback).toBeCalled();
+        expect(afterThrowCallback.mock.calls[0][0]).toStrictEqual({msg: 'rawFn.error'});
+        expect(afterCallback).not.toBeCalled();
     });
 
     it('when before throw error then throw error and afterThrow is ignored', () => {
@@ -220,6 +221,44 @@ describe('decorate with object', () => {
             decorated(100, 200);
         }).toThrow();
         expect(rawFn).not.toBeCalled();
+        expect(afterThrowCallback).not.toBeCalled();
+    });
+
+    it('when afterReturn throw error then throw error and afterThrow is ignored', () => {
+        const rawFn = jest.fn();
+        const afterThrowCallback = jest.fn();
+
+        function afterReturnCallback() {
+            throw {msg: 'afterReturnCallback.error'};
+        }
+
+        const decorated = decorate(rawFn, {
+            afterReturn: afterReturnCallback,
+            afterThrow: afterThrowCallback
+        });
+        expect(() => {
+            decorated(100, 200);
+        }).toThrow();
+        expect(rawFn).toBeCalled();
+        expect(afterThrowCallback).not.toBeCalled();
+    });
+
+    it('when after throw error then throw error and afterThrow is ignored', () => {
+        const rawFn = jest.fn();
+        const afterThrowCallback = jest.fn();
+
+        function afterCallback() {
+            throw {msg: 'afterCallback.error'};
+        }
+
+        const decorated = decorate(rawFn, {
+            after: afterCallback,
+            afterThrow: afterThrowCallback
+        });
+        expect(() => {
+            decorated(100, 200);
+        }).toThrow();
+        expect(rawFn).toBeCalled();
         expect(afterThrowCallback).not.toBeCalled();
     });
 });

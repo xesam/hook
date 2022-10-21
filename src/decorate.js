@@ -32,32 +32,36 @@ function _object(srcFn, decoration, context) {
             decoration.before.apply(this, args);
         }
         let theReturn = undefined;
-        if (decoration.afterThrow) {
-            try {
-                if (src) {
-                    theReturn = src.apply(this, args);
-                }
-                if (decoration.afterReturn) {
-                    theReturn = decoration.afterReturn.apply(this, [theReturn].concat(args));
-                }
-            } catch (e) {
-                decoration.afterThrow.apply(this, [e].concat(args));
-            } finally {
-                if (decoration.after) {
-                    theReturn = decoration.after.apply(this, [theReturn].concat(args));
-                }
-            }
-            return theReturn;
-        } else {
+        let foundSrcError = false;
+        let theSrcError = null;
+        try {
             if (src) {
                 theReturn = src.apply(this, args);
             }
+        } catch (e) {
+            foundSrcError = true;
+            theSrcError = e;
+        }
+        if (foundSrcError) {
+            if (decoration.afterThrow) {
+                const interrupted = decoration.afterThrow.apply(this, [theSrcError].concat(args));
+                if (typeof interrupted !== 'boolean') {
+                    console.warn('you should return a boolean');
+                }
+                if (!interrupted) {
+                    throw theSrcError;
+                }
+            } else {
+                throw theSrcError;
+            }
+        } else {
             if (decoration.afterReturn) {
                 theReturn = decoration.afterReturn.apply(this, [theReturn].concat(args));
             }
-            if (decoration.after) {
-                theReturn = decoration.after.apply(this, [theReturn].concat(args));
-            }
+        }
+
+        if (decoration.after) {
+            decoration.after.apply(this, [theReturn, theSrcError].concat(args));
         }
         return theReturn;
     };
