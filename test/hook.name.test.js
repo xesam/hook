@@ -41,12 +41,16 @@ describe('hook single name', () => {
         const hooked = hook(rawObj, 'onLoad', {
             before(a, b) {
                 onLoadHook(this.data, a, b);
+            },
+            afterReturn(res, a, b) {
+                return {a, b};
             }
         });
 
-        hooked.onLoad(100, 200);
+        const res = hooked.onLoad(100, 200);
         expect(onLoadMock.mock.calls[0]).toEqual(['rawObj.value', {name: 'rawObj.data.value'}, 100, 200]);
         expect(onLoadHook.mock.calls[0]).toEqual([{name: 'rawObj.data.value'}, 100, 200]);
+        expect(res).toStrictEqual({a: 100, b: 200});
     });
 
     it('when hook a non exist method with null then change nothing', () => {
