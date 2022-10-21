@@ -203,4 +203,23 @@ describe('decorate with object', () => {
         expect(afterThrowCallback.mock.calls[0][0]).toStrictEqual({msg: 'rawFn.error'});
         expect(afterCallback).toBeCalled();
     });
+
+    it('when before throw error then throw error and afterThrow is ignored', () => {
+        const rawFn = jest.fn();
+        const afterThrowCallback = jest.fn();
+
+        function beforeCallback() {
+            throw {msg: 'beforeCallback.error'};
+        }
+
+        const decorated = decorate(rawFn, {
+            before: beforeCallback,
+            afterThrow: afterThrowCallback
+        });
+        expect(() => {
+            decorated(100, 200);
+        }).toThrow();
+        expect(rawFn).not.toBeCalled();
+        expect(afterThrowCallback).not.toBeCalled();
+    });
 });
