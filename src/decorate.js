@@ -21,8 +21,9 @@ function _function(srcFn, decoration, context) {
 /**
  * _object(srcFn, {
  *   before:function(){},
- *   after:function(){},
- *   afterThrow:function(){}
+ *   afterReturn:function(){},
+ *   afterThrow:function(){},
+ *   after:function(){}
  * }, context)
  * */
 function _object(srcFn, decoration, context) {
@@ -30,36 +31,35 @@ function _object(srcFn, decoration, context) {
         if (decoration.before) {
             decoration.before.apply(this, args);
         }
-        let retObj = undefined;
+        let theReturn = undefined;
         if (decoration.afterThrow) {
             try {
                 if (src) {
-                    retObj = src.apply(this, args);
+                    theReturn = src.apply(this, args);
                 }
                 if (decoration.afterReturn) {
-                    retObj = decoration.afterReturn.apply(this, [retObj].concat(args));
+                    theReturn = decoration.afterReturn.apply(this, [theReturn].concat(args));
                 }
             } catch (e) {
                 decoration.afterThrow.apply(this, [e].concat(args));
-            }finally {
+            } finally {
                 if (decoration.after) {
-                    retObj = decoration.after.apply(this, [retObj].concat(args));
+                    theReturn = decoration.after.apply(this, [theReturn].concat(args));
                 }
             }
-            return retObj;
+            return theReturn;
         } else {
-            let retObj = null;
             if (src) {
-                retObj = src.apply(this, args);
+                theReturn = src.apply(this, args);
             }
             if (decoration.afterReturn) {
-                retObj = decoration.afterReturn.apply(this, [retObj].concat(args));
+                theReturn = decoration.afterReturn.apply(this, [theReturn].concat(args));
             }
             if (decoration.after) {
-                retObj = decoration.after.apply(this, [retObj].concat(args));
+                theReturn = decoration.after.apply(this, [theReturn].concat(args));
             }
-            return retObj;
         }
+        return theReturn;
     };
     return _function(srcFn, objDecoration, context);
 }
