@@ -53,30 +53,53 @@ describe('hook single name', () => {
         expect(res).toStrictEqual({a: 100, b: 200});
     });
 
-    it('when hook a non exist method with null then change nothing', () => {
-        const hooked = hook(rawObj, 'nonExist');
-        expect(hooked.nonExist).toBeUndefined();
+    it('when hook a none-exist method with null then change nothing', () => {
+        const hooked = hook(rawObj, 'noneExist');
+        expect(hooked.noneExist).toBeUndefined();
     });
 
-    it('when hook a non exist method with void function then change nothing', () => {
-        const hooked = hook(rawObj, 'nonExist', function () {
+    it('when hook a none-exist method with void-return-function then change nothing', () => {
+        const hooked = hook(rawObj, 'noneExist', function () {
         });
-        expect(hooked.nonExist).toBeUndefined();
+        expect(hooked.noneExist).toBeUndefined();
     });
 
-    it('when hook a non exist method with empty object then change nothing', () => {
-        const hooked = hook(rawObj, 'nonExist', {});
-        expect(hooked.nonExist).not.toBeUndefined();
+    it('when hook a none-exist method with empty object then change nothing', () => {
+        const hooked = hook(rawObj, 'noneExist', {});
+        expect(hooked.noneExist).not.toBeUndefined();
     });
 
-    it('when hook a non exist method with empty function then change nothing', () => {
-        const hooked = hook(rawObj, 'nonExist', function () {
+    it('when hook none-exist method with empty-return-function then change nothing', () => {
+        const hooked = hook(rawObj, 'noneExist', function () {
             return {};
         });
-        expect(hooked.nonExist).not.toBeUndefined();
+        expect(hooked.noneExist).not.toBeUndefined();
+    });
+    it('when hook none-exist method with config then create the method', () => {
+        const onnoneExistHook = jest.fn();
+
+        const hooked = hook(rawObj, 'noneExist', {
+            before(a, b) {
+                onnoneExistHook(this.name, this.data, a, b);
+            }
+        });
+        hooked.noneExist(100, 200);
+        expect(onnoneExistHook.mock.calls[0]).toEqual(['rawObj.value', {name: 'rawObj.data.value'}, 100, 200]);
     });
 
-    it('when hook the nest method then use nest context', () => {
+    it('when hook none-exist method with config then create the method', () => {
+        const onnoneExistHook = jest.fn();
+
+        const hooked = hook(rawObj, 'lifetimes.noneExist', {
+            before(a, b) {
+                onnoneExistHook(this.name, this.data, a, b);
+            }
+        });
+        hooked.lifetimes.noneExist(100, 200);
+        expect(onnoneExistHook.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}, 100, 200]);
+    });
+
+    it('when hook child object then use child object as context', () => {
         const onLifetimeCreateHook = jest.fn();
         const hooked = hook(rawObj.lifetimes, 'created', {
             before(a, b) {
@@ -86,6 +109,19 @@ describe('hook single name', () => {
         hooked.created(100, 200);
         expect(onLifetimeCreateHook.mock.calls[0]).toEqual([{name: 'lifetimes.data.value'}, 100, 200]);
         expect(onLifetimeCreateMock.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}, 100, 200]);
+    });
+
+    it('when hook child object with param context then use the param context', () => {
+        const onLifetimeCreateHook = jest.fn();
+        const hooked = hook(rawObj.lifetimes, 'created', {
+            before(a, b) {
+                onLifetimeCreateHook(this.data, a, b);
+            }
+        }, {data: {name: "param.this"}});
+
+        hooked.created(100, 200);
+        expect(onLifetimeCreateHook.mock.calls[0]).toEqual([{name: "param.this"}, 100, 200]);
+        expect(onLifetimeCreateMock.mock.calls[0]).toEqual([undefined, {name: 'param.this'}, 100, 200]);
     });
 
     it('when hook the nest attr then use nest context', () => {
@@ -99,41 +135,19 @@ describe('hook single name', () => {
         expect(onLifetimeCreateHook.mock.calls[0]).toEqual([{name: 'lifetimes.data.value'}, 100, 200]);
         expect(onLifetimeCreateMock.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}, 100, 200]);
     });
-    it('when hook none exist method then create the method', () => {
-        const onNonExistHook = jest.fn();
 
-        const hooked = hook(rawObj, 'nonExist', {
-            before(a, b) {
-                onNonExistHook(this.name, this.data, a, b);
-            }
-        });
-        hooked.nonExist(100, 200);
-        expect(onNonExistHook.mock.calls[0]).toEqual(['rawObj.value', {name: 'rawObj.data.value'}, 100, 200]);
-    });
-
-    it('when hook none exist method then create the method', () => {
-        const onNonExistHook = jest.fn();
-
-        const hooked = hook(rawObj, 'lifetimes.nonExist', {
-            before(a, b) {
-                onNonExistHook(this.name, this.data, a, b);
-            }
-        });
-        hooked.lifetimes.nonExist(100, 200);
-        expect(onNonExistHook.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}, 100, 200]);
-    });
-
-    it('when hook the nest method then use nest context', () => {
+    it('when hook the nest attr with param context then use the param context', () => {
         const onLifetimeCreateHook = jest.fn();
-        const hooked = hook(rawObj.lifetimes, 'created', {
+        const hooked = hook(rawObj, 'lifetimes.created', {
             before(a, b) {
                 onLifetimeCreateHook(this.data, a, b);
             }
         }, {data: {name: "param.this"}});
 
-        hooked.created(100, 200);
+        hooked.lifetimes.created(100, 200);
         expect(onLifetimeCreateHook.mock.calls[0]).toEqual([{name: "param.this"}, 100, 200]);
         expect(onLifetimeCreateMock.mock.calls[0]).toEqual([undefined, {name: 'param.this'}, 100, 200]);
     });
+
 });
 
