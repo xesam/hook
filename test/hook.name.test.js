@@ -95,63 +95,41 @@ describe('hook single name', () => {
         expect(onLifetimeCreateHook.mock.calls[0]).toEqual([{name: 'lifetimes.data.value'}, 100, 200]);
         expect(onLifetimeCreateMock.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}, 100, 200]);
     });
+    it('when hook none exist method then create the method', () => {
+        const onNonExistHook = jest.fn();
 
-
-    it('none exist attr', () => {
-        const onLoadHook = jest.fn();
-        const targetObj = {
-            data: {
-                name: 'target'
-            }
-        };
-
-        const hooked = hook(targetObj, 'onLoad', {
+        const hooked = hook(rawObj, 'nonExist', {
             before(a, b) {
-                onLoadHook(this.data, a, b);
+                onNonExistHook(this.name, this.data, a, b);
             }
         });
-        hooked.onLoad(100, 200);
-        expect(onLoadHook.mock.calls[0]).toEqual([{name: 'target'}, 100, 200]);
+        hooked.nonExist(100, 200);
+        expect(onNonExistHook.mock.calls[0]).toEqual(['rawObj.value', {name: 'rawObj.data.value'}, 100, 200]);
     });
 
-    it('none exist compound attr', () => {
-        const onLoadHook = jest.fn();
-        const targetObj = {
-            data: {
-                name: 'target'
-            }
-        };
+    it('when hook none exist method then create the method', () => {
+        const onNonExistHook = jest.fn();
 
-        const hooked = hook(targetObj, 'lifecycle.onLoad', {
+        const hooked = hook(rawObj, 'lifetimes.nonExist', {
             before(a, b) {
-                onLoadHook(this.data, a, b);
+                onNonExistHook(this.name, this.data, a, b);
             }
-        }, targetObj);
-        hooked.lifecycle.onLoad(100, 200);
-        expect(onLoadHook.mock.calls[0]).toEqual([{name: 'target'}, 100, 200]);
+        });
+        hooked.lifetimes.nonExist(100, 200);
+        expect(onNonExistHook.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}, 100, 200]);
     });
 
-    it('compound attr with this', () => {
-        const onLoadFn = jest.fn();
-        const onLoadHook = jest.fn();
-        const targetObj = {
-            data: 'target.this',
-            life: {
-                data: 'life.this',
-                onLoad(a, b) {
-                    onLoadFn(this.data, a, b);
-                }
-            }
-        };
-        const hooked = hook(targetObj.life, 'onLoad', {
+    it('when hook the nest method then use nest context', () => {
+        const onLifetimeCreateHook = jest.fn();
+        const hooked = hook(rawObj.lifetimes, 'created', {
             before(a, b) {
-                onLoadHook(this.data, a, b);
+                onLifetimeCreateHook(this.data, a, b);
             }
-        }, {data: "param.this"});
+        }, {data: {name: "param.this"}});
 
-        hooked.onLoad(100, 200);
-        expect(onLoadFn.mock.calls[0]).toEqual(["param.this", 100, 200]);
-        expect(onLoadHook.mock.calls[0]).toEqual(["param.this", 100, 200]);
+        hooked.created(100, 200);
+        expect(onLifetimeCreateHook.mock.calls[0]).toEqual([{name: "param.this"}, 100, 200]);
+        expect(onLifetimeCreateMock.mock.calls[0]).toEqual([undefined, {name: 'param.this'}, 100, 200]);
     });
 });
 
