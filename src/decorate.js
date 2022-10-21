@@ -26,13 +26,13 @@ function _function(srcFn, decoration, context) {
  * }, context)
  * */
 function _object(srcFn, decoration, context) {
-    return _function(srcFn, function (src, ...args) {
+    const objDecoration = function _object_ecoration(src, ...args) {
         if (decoration.before) {
             decoration.before.apply(this, args);
         }
         if (decoration.afterThrow) {
             try {
-                let retObj = null;
+                let retObj = undefined;
                 if (src) {
                     retObj = src.apply(this, args);
                 }
@@ -53,7 +53,8 @@ function _object(srcFn, decoration, context) {
             }
             return retObj;
         }
-    }, context);
+    };
+    return _function(srcFn, objDecoration, context);
 }
 
 function decorate(srcFn, decoration, context) {

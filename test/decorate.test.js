@@ -249,15 +249,9 @@ describe('decorate with object', () => {
         }
 
         const decorated = decorate(rawFn, {
-            before() {
-                beforeCallback();
-            },
-            after() {
-                afterCallback();
-            },
-            afterThrow(e) {
-                throwCallback(e);
-            }
+            before: beforeCallback,
+            after: afterCallback,
+            afterThrow: throwCallback
         });
         decorated(100, 200);
         expect(beforeCallback).toBeCalled();
