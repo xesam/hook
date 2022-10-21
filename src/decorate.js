@@ -30,23 +30,30 @@ function _object(srcFn, decoration, context) {
         if (decoration.before) {
             decoration.before.apply(this, args);
         }
+        let retObj = undefined;
         if (decoration.afterThrow) {
             try {
-                let retObj = undefined;
                 if (src) {
                     retObj = src.apply(this, args);
                 }
+                if (decoration.afterReturn) {
+                    retObj = decoration.afterReturn.apply(this, [retObj].concat(args));
+                }
+            } catch (e) {
+                decoration.afterThrow.apply(this, [e].concat(args));
+            }finally {
                 if (decoration.after) {
                     retObj = decoration.after.apply(this, [retObj].concat(args));
                 }
-                return retObj;
-            } catch (e) {
-                decoration.afterThrow.apply(this, [e].concat(args));
             }
+            return retObj;
         } else {
             let retObj = null;
             if (src) {
                 retObj = src.apply(this, args);
+            }
+            if (decoration.afterReturn) {
+                retObj = decoration.afterReturn.apply(this, [retObj].concat(args));
             }
             if (decoration.after) {
                 retObj = decoration.after.apply(this, [retObj].concat(args));

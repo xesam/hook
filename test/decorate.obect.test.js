@@ -1,19 +1,77 @@
 const decorate = require('../src/decorate');
 describe('decorate with object', () => {
-    it('when before and after is provided then call before then call raw then call after', () => {
+    it('when before and afterReturn and after are provided then call before then call raw then call afterReturn then call after', () => {
         const srcFn = jest.fn();
         const beforeCallback = jest.fn();
+        const afterReturnCallback = jest.fn();
         const afterCallback = jest.fn();
 
         let decorated = decorate(srcFn, {
             before: beforeCallback,
+            afterReturn: afterReturnCallback,
             after: afterCallback
         });
 
         decorated(100, 200);
         expect(beforeCallback).toBeCalledTimes(1);
         expect(srcFn).toBeCalledTimes(1);
+        expect(afterReturnCallback).toBeCalledTimes(1);
         expect(afterCallback).toBeCalledTimes(1);
+    });
+
+    it("when afterReturn is provided then return the afterReturn's return", () => {
+        const srcFn = jest.fn().mockReturnValue({srcName: 'srcFn.name'});
+        let decorated = decorate(srcFn, {
+            afterReturn(rawReturn) {
+                return {
+                    ...rawReturn,
+                    afterReturnName: 'afterReturn.name'
+                };
+            }
+        });
+        const finalReturn = decorated(100, 200);
+        expect(finalReturn).toStrictEqual({srcName: 'srcFn.name', afterReturnName: 'afterReturn.name'});
+    });
+
+    it("when after is provided then return the after's return", () => {
+        const srcFn = jest.fn().mockReturnValue({srcName: 'srcFn.name'});
+        let decorated = decorate(srcFn, {
+            after(rawReturn) {
+                return {
+                    ...rawReturn,
+                    afterName: 'after.name'
+                };
+            }
+        });
+        const finalReturn = decorated(100, 200);
+        expect(finalReturn).toStrictEqual({
+            srcName: 'srcFn.name',
+            afterName: 'after.name'
+        });
+    });
+
+    it("when afterReturn and after are provided then return the after's return", () => {
+        const srcFn = jest.fn().mockReturnValue({srcName: 'srcFn.name'});
+        let decorated = decorate(srcFn, {
+            afterReturn(rawReturn) {
+                return {
+                    ...rawReturn,
+                    afterReturnName: 'afterReturn.name'
+                };
+            },
+            after(rawReturn) {
+                return {
+                    ...rawReturn,
+                    afterName: 'after.name'
+                };
+            }
+        });
+        const finalReturn = decorated(100, 200);
+        expect(finalReturn).toStrictEqual({
+            srcName: 'srcFn.name',
+            afterReturnName: 'afterReturn.name',
+            afterName: 'after.name'
+        });
     });
 
     it("when after is provided then return the after's return", () => {
@@ -128,24 +186,21 @@ describe('decorate with object', () => {
         expect(afterCallback.mock.calls[0]).toEqual(['param.extra', 100, 200]);
     });
 
-    it('when raw-function throw error then before is called and afterThrow is called but after is ignored', () => {
-        const beforeCallback = jest.fn();
+    it('when raw-function throw error then before is called then afterThrow is called then after is called', () => {
         const afterCallback = jest.fn();
-        const throwCallback = jest.fn();
+        const afterThrowCallback = jest.fn();
 
         function rawFn() {
             throw {msg: 'rawFn.error'};
         }
 
         const decorated = decorate(rawFn, {
-            before: beforeCallback,
             after: afterCallback,
-            afterThrow: throwCallback
+            afterThrow: afterThrowCallback
         });
         decorated(100, 200);
-        expect(beforeCallback).toBeCalled();
-        expect(afterCallback).not.toBeCalled();
-        expect(throwCallback).toBeCalled();
-        expect(throwCallback.mock.calls[0][0]).toStrictEqual({msg: 'rawFn.error'});
+        expect(afterThrowCallback).toBeCalled();
+        expect(afterThrowCallback.mock.calls[0][0]).toStrictEqual({msg: 'rawFn.error'});
+        expect(afterCallback).toBeCalled();
     });
 });
