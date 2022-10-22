@@ -119,7 +119,7 @@ describe('hook child object', () => {
             }
         };
     })
-    it('when hook lifetimes with config-object then lifetimes.created.before and lifetimes.created.ready are called', () => {
+    it('when hook lifetimes with config-object then lifetimes.created.before and lifetimes.created.afterReturn are called', () => {
         const theHook = jest.fn();
         const hooked = hook(rawObj.lifetimes, 'created', {
             before(a, b) {
@@ -131,14 +131,12 @@ describe('hook child object', () => {
         });
 
         const res = hooked.created(100, 200);
-        hooked.ready(100, 200);
         expect(theHook.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}, 100, 200]);
         expect(onLifetimeCreateMock.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}, 100, 200]);
-        expect(onLifetimeReadyMock.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}]);
         expect(res).toStrictEqual({a: 100, b: 200});
     });
 
-    it('when hook lifetimes with function-object then lifetimes.created.before and lifetimes.created.ready are called', () => {
+    it('when hook lifetimes with function-object then lifetimes.created.before and lifetimes.created.afterReturn are called', () => {
         const theHook = jest.fn();
         const hooked = hook(rawObj.lifetimes, {
             created(host) {
@@ -154,10 +152,8 @@ describe('hook child object', () => {
         });
 
         const res = hooked.created(100, 200);
-        hooked.ready(100, 200);
         expect(theHook.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}, 100, 200]);
         expect(onLifetimeCreateMock.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}, 100, 200]);
-        expect(onLifetimeReadyMock.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}]);
         expect(res).toStrictEqual({a: 100, b: 200});
     });
 
@@ -218,7 +214,7 @@ describe('hook compound method', () => {
             }
         };
     })
-    it('when hook lifetimes with config-object then lifetimes.created.before and lifetimes.created.ready are called', () => {
+    it('when hook lifetimes with config-object then lifetimes.created.before and lifetimes.created.afterReturn are called', () => {
         const theHook = jest.fn();
         const hooked = hook(rawObj, 'lifetimes.created', {
             before(a, b) {
@@ -230,10 +226,8 @@ describe('hook compound method', () => {
         });
 
         const res = hooked.lifetimes.created(100, 200);
-        hooked.lifetimes.ready(100, 200);
         expect(theHook.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}, 100, 200]);
         expect(onLifetimeCreateMock.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}, 100, 200]);
-        expect(onLifetimeReadyMock.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}]);
         expect(res).toStrictEqual({a: 100, b: 200});
     });
 
@@ -252,11 +246,9 @@ describe('hook compound method', () => {
             }
         });
 
-        const res =  hooked.lifetimes.created(100, 200);
-        hooked.lifetimes.ready(100, 200);
+        const res = hooked.lifetimes.created(100, 200);
         expect(theHook.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}, 100, 200]);
         expect(onLifetimeCreateMock.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}, 100, 200]);
-        expect(onLifetimeReadyMock.mock.calls[0]).toEqual(['lifetimes.value', {name: 'lifetimes.data.value'}]);
         expect(res).toStrictEqual({a: 100, b: 200});
     });
 
