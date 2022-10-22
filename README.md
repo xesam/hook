@@ -53,7 +53,11 @@ output:
         before(a, b) {
             console.log('before');
         },
-        afterReturn(res, a, b) { // res = fn(100, 200)
+        afterReturn(result, a, b) { // result = fn(100, 200)
+            console.log('after');
+            return result;
+        },
+        after(result, error, a, b) { 
             console.log('after');
             return res;
         }
@@ -121,18 +125,18 @@ output:
    hook3.onLoad();
    
    const hook4 = hook(target, {
-       onLoad() {
+       onLoad(host) {
            return {
                before(query) {
                    console.log('before');
                },
                afterReturn(res, query) {
                    console.log('after');
-           return res;
+                   return res;
                }
            };
        },
-       onShow() {
+       onShow(host) {
            return {
                before() {
                    console.log('before');
