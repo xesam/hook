@@ -37,7 +37,27 @@ describe('hook root object', () => {
         expect(res).toStrictEqual({a: 100, b: 200});
     });
 
-    it('when hook onLoad with function-object then onLoad.before and onLoad.afterReturn are called', () => {
+    it('when hook with named-config-object then onLoad.before and onLoad.afterReturn are called', () => {
+        const onLoadHook = jest.fn();
+        const hooked = hook(rawObj, {
+            onLoad: {
+                before(a, b) {
+                    onLoadHook(this.data, a, b);
+                },
+                afterReturn(res, a, b) {
+                    return {a, b};
+                }
+            }
+        });
+
+        const res = hooked.onLoad(100, 200);
+        expect(onLoadMock.mock.calls[0]).toEqual(['rawObj.value', {name: 'rawObj.data.value'}, 100, 200]);
+        expect(onLoadHook.mock.calls[0]).toEqual([{name: 'rawObj.data.value'}, 100, 200]);
+        expect(res).toStrictEqual({a: 100, b: 200});
+    });
+
+
+    it('when hook with named-function-object then onLoad.before and onLoad.afterReturn are called', () => {
         const onLoadHook = jest.fn();
         const hooked = hook(rawObj, {
             onLoad(host) {
