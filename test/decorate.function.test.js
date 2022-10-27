@@ -1,10 +1,11 @@
 const decorate = require('../src/decorate');
 
 describe('decorate function', () => {
-    it('when decorate with null then return raw-function', () => {
+    it('when decorate with null then just wrap src-function', () => {
         const srcFn = jest.fn();
         const decorated = decorate(srcFn);
         decorated(100, 200);
+        expect(decorated).not.toEqual(srcFn);
         expect(srcFn.mock.calls[0]).toEqual([100, 200]);
     });
 

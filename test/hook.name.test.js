@@ -56,7 +56,6 @@ describe('hook root object', () => {
         expect(res).toStrictEqual({a: 100, b: 200});
     });
 
-
     it('when hook with named-function-object then onLoad.before and onLoad.afterReturn are called', () => {
         const onLoadHook = jest.fn();
         const hooked = hook(rawObj, {
@@ -83,15 +82,26 @@ describe('hook root object', () => {
         expect(hooked.noneExist).toBeUndefined();
     });
 
+    it('when hook none-exist method with empty config-object then create the method', () => {
+        const hooked = hook(rawObj, 'noneExist', {});
+        expect(hooked.noneExist).not.toBeUndefined();
+    });
+
+    it('when hook none-exist method with non-empty config-object then create the method', () => {
+        const noneExistHook = jest.fn();
+        const hooked = hook(rawObj, 'noneExist', {
+            before(a, b) {
+                noneExistHook(this.name, this.data, a, b);
+            }
+        });
+        hooked.noneExist(100, 200);
+        expect(noneExistHook.mock.calls[0]).toEqual(['rawObj.value', {name: 'rawObj.data.value'}, 100, 200]);
+    });
+
     it('when hook none-exist method with void-return-function then change nothing', () => {
         const hooked = hook(rawObj, 'noneExist', function () {
         });
         expect(hooked.noneExist).toBeUndefined();
-    });
-
-    it('when hook none-exist method with empty object then create the method', () => {
-        const hooked = hook(rawObj, 'noneExist', {});
-        expect(hooked.noneExist).not.toBeUndefined();
     });
 
     it('when hook none-exist method with empty-return-function then create the method', () => {
@@ -100,16 +110,39 @@ describe('hook root object', () => {
         });
         expect(hooked.noneExist).not.toBeUndefined();
     });
-    it('when hook none-exist method with config-object then create the method', () => {
-        const noneExistHook = jest.fn();
 
-        const hooked = hook(rawObj, 'noneExist', {
-            before(a, b) {
-                noneExistHook(this.name, this.data, a, b);
+    it('when hook none-exist method with falsy named-config-object then then change nothing', () => {
+        const hooked = hook(rawObj, {
+            noneExist1: null,
+            noneExist2: false,
+            noneExist3: undefined,
+            noneExist4: {}
+        });
+        expect(hooked.noneExist1).toBeUndefined();
+        expect(hooked.noneExist2).toBeUndefined();
+        expect(hooked.noneExist3).toBeUndefined();
+        expect(hooked.noneExist4).not.toBeUndefined();
+    });
+
+    it('when hook none-exist method with falsy named-function-object then then change nothing', () => {
+        const hooked = hook(rawObj, {
+            noneExist1() {
+                return null;
+            },
+            noneExist2() {
+                return false;
+            },
+            noneExist3() {
+                return undefined;
+            },
+            noneExist4() {
+                return {}
             }
         });
-        hooked.noneExist(100, 200);
-        expect(noneExistHook.mock.calls[0]).toEqual(['rawObj.value', {name: 'rawObj.data.value'}, 100, 200]);
+        expect(hooked.noneExist1).toBeUndefined();
+        expect(hooked.noneExist2).toBeUndefined();
+        expect(hooked.noneExist3).toBeUndefined();
+        expect(hooked.noneExist4).not.toBeUndefined();
     });
 });
 

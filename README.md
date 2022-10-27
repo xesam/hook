@@ -1,4 +1,4 @@
-# js hook
+# @xesam/hook
 
 a simple javascript decorate/hook library.
 
@@ -152,6 +152,10 @@ output:
 ```
 
 ### ChangeLogs
+
+#### 0.1.7
+
+1. todo
 
 #### 0.1.6
 
